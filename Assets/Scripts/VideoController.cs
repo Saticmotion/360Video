@@ -24,6 +24,7 @@ public class VideoController : MonoBehaviour
 	public bool playing = true;
 	public RenderTexture baseRenderTexture;
 	public AudioSource audioSource;
+	public VideoSettings videoSettings;
 
 	public bool videoLoaded;
 
@@ -176,10 +177,21 @@ public class VideoController : MonoBehaviour
 		audioSource.Pause();
 		playing = false;
 	}
-
+	
 	public void PlayFile(string filename)
 	{
-		video.url = filename;
+		var streamer = new VideoStreamManager();
+
+		if (false)
+		{
+			//TODO (Jeroen): Check if downloaded
+			video.url = streamer.GetUrl("608133e6-abe1-4f2a-a9e0-cbad21843ed4", VideoQuality.x2160p);
+		}
+		else
+		{
+			video.url = filename;
+		}
+
 		if (screenshots != null)
 		{
 			screenshots.url = filename;
