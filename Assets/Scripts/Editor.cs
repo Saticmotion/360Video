@@ -39,7 +39,8 @@ public enum InteractionType
 	Audio,
 	FindArea,
 	MultipleChoiceArea,
-	MultipleChoiceImage
+	MultipleChoiceImage,
+	TabularData
 }
 
 public enum Perspective
@@ -432,6 +433,10 @@ public class Editor : MonoBehaviour
 							interactionEditor.GetComponent<MultipleChoiceImagePanelEditor>().Init("", null);
 							break;
 						}
+						case InteractionType.TabularData:
+							interactionEditor = Instantiate(UIPanels.Instance.tabularDataPanelEditor, Canvass.main.transform).gameObject;
+							interactionEditor.GetComponent<TabularDataPanelEditor>().Init("", new List<string>());
+							break;
 						default:
 						{
 							Debug.LogError("FFS, you shoulda added it here");
@@ -676,6 +681,25 @@ public class Editor : MonoBehaviour
 						finished = true;
 					}
 					break;
+				}
+				case InteractionType.TabularData:
+				{
+					var editor = interactionEditor.GetComponent<TabularDataPanelEditor>();
+
+					if (editor.answered)
+					{
+						var panel = Instantiate(UIPanels.Instance.tabularDataPanel, Canvass.main.transform);
+						lastPlacedPoint.title = editor.answerTitle;
+						lastPlacedPoint.body = string.Join(",", editor.answerTabularData);
+						//NOTE(Kristof): \f is used as a split character to divide the string into an array
+						lastPlacedPoint.panel = panel.gameObject;
+
+						//NOTE(Kristof): Init after building the correct body string because the function expect the correct answer index to be passed with the string
+						panel.Init(editor.answerTitle, editor.answerTabularData);
+
+						finished = true;
+					}
+						break;
 				}
 				default:
 				{
@@ -943,6 +967,21 @@ public class Editor : MonoBehaviour
 						pointToEdit.body = editor.answerCorrect.ToString();
 						pointToEdit.filename = String.Join("\f", newFilenames);
 						pointToEdit.panel = panel.gameObject;
+						finished = true;
+					}
+					break;
+				}
+				case InteractionType.TabularData:
+				{
+					var editor = interactionEditor.GetComponent<TabularDataPanelEditor>();
+					if (editor.answered)
+					{
+						var panel = pointToEdit.panel.GetComponent<TabularDataPanel>();
+						pointToEdit.title = editor.answerTitle;
+						pointToEdit.body = string.Join(",", editor.answerTabularData);
+						pointToEdit.panel = panel.gameObject;
+
+						panel.Init(editor.answerTitle, editor.answerTabularData);
 						finished = true;
 					}
 					break;
@@ -1623,6 +1662,12 @@ public class Editor : MonoBehaviour
 						interactionEditor.GetComponent<MultipleChoiceImagePanelEditor>().Init(point.title, fullPaths, correct);
 						break;
 					}
+					case InteractionType.TabularData:
+					{
+						interactionEditor = Instantiate(UIPanels.Instance.tabularDataPanelEditor, Canvass.main.transform).gameObject;
+						interactionEditor.GetComponent<TabularDataPanelEditor>().Init(point.title, point.body.Split(',').ToList());
+						break;
+					}
 					default:
 						throw new ArgumentOutOfRangeException();
 				}
@@ -2224,6 +2269,13 @@ public class Editor : MonoBehaviour
 
 					var correct = Int32.Parse(point.body);
 					panel.Init(newInteractionPoint.title, urls, correct);
+					newInteractionPoint.panel = panel.gameObject;
+					break;
+				}
+				case InteractionType.TabularData:
+				{
+					var panel = Instantiate(UIPanels.Instance.tabularDataPanel, Canvass.main.transform);
+					panel.Init(newInteractionPoint.title, newInteractionPoint.body.Split(',').ToList());
 					newInteractionPoint.panel = panel.gameObject;
 					break;
 				}

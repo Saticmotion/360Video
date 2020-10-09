@@ -2002,6 +2002,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5216618106651781666, guid: 0cab7f5bbaadd8043a1815cb7676b360,
+        type: 3}
+      propertyPath: tabularDataPanel
+      value: 
+      objectReference: {fileID: 8660734572250089207, guid: b258900f25720d7469bdcb6fc8e052f5,
+        type: 3}
     - target: {fileID: 5216618106651781667, guid: 0cab7f5bbaadd8043a1815cb7676b360,
         type: 3}
       propertyPath: m_Name

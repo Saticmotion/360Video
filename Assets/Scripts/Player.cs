@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
@@ -50,6 +51,7 @@ public class Player : MonoBehaviour
 	public GameObject findAreaPanelPrefab;
 	public GameObject multipleChoiceAreaPanelPrefab;
 	public GameObject multipleChoiceImagePanelPrefab;
+	public GameObject tabularDataPanelPrefab;
 	public GameObject cameraRig;
 	public GameObject projectorPrefab;
 
@@ -556,6 +558,13 @@ public class Player : MonoBehaviour
 					newInteractionPoint.panel = panel;
 					break;
 				}
+				case InteractionType.TabularData:
+				{
+					var panel = Instantiate(tabularDataPanelPrefab, Canvass.sphereUIPanelWrapper.transform);
+					panel.GetComponent<TabularDataPanelSphere>().Init(newInteractionPoint.title, newInteractionPoint.body.Split(',').ToList());
+					newInteractionPoint.panel = panel;
+					break;
+					}
 				default:
 				{
 					isValidPoint = false;
