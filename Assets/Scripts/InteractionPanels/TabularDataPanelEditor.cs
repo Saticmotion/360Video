@@ -29,8 +29,8 @@ public class TabularDataPanelEditor : MonoBehaviour
 	private int currentRows = 1;
 	private int currentColumns = 1;
 
-	//NOTE(Jitse): MAXCOLUMNS = 8 due to width limitations.
-	private const int MAXCOLUMNS = 8;
+	//NOTE(Jitse): MAXCOLUMNS == 8 due to (current) width limitations.
+	private const int MAXCOLUMNS = 5;
 	private const int MAXROWS = 20;
 	private const float GRIDCELLSIZEX = 430;
 	private const float GRIDCELLSIZEY = 220;

@@ -16,8 +16,6 @@ public class TabularDataPanelSphere : MonoBehaviour
 	private int currentColumns = 0;
 	private int currentRows = 0;
 	private int currentPage = 0;
-	private float scrollPanelWidth;
-	private float scrollPanelHeight;
 
 	private const float GRIDCELLSIZEX = 430;
 	private const float GRIDCELLSIZEY = 220;
@@ -66,9 +64,11 @@ public class TabularDataPanelSphere : MonoBehaviour
 		tabularDataWrapper.GetComponent<GridLayoutGroup2>().cellSize = new Vector2(cellSizeX, cellSizeY);
 	}
 
+	//TODO(Jitse): Choose between destroying objects or pooling.
+	//TODO(cont.): Uncomment the parts from here on out to destroy objects (and then also delete the uncommented code.)
 	private void PopulateTable()
 	{
-		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
+		/*int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
 		if (rowLimit > currentRows)
 		{
 			rowLimit = currentRows;
@@ -93,19 +93,76 @@ public class TabularDataPanelSphere : MonoBehaviour
 
 				dataCell.transform.SetAsLastSibling();
 			}
+		}*/
+
+		for (int row = 0; row < currentRows; row++)
+		{
+			for (int column = 0; column < currentColumns; column++)
+			{
+				var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
+				if (row >= MAXROWSPAGE)
+				{
+					dataCell.gameObject.SetActive(false);
+				}
+				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
+				cellText.interactable = false;
+				string newText = tabularData[row * currentColumns + column];
+
+				if (newText.Contains("//comma//"))
+				{
+					newText = newText.Replace("//comma//", ",");
+				}
+
+				cellText.text = newText;
+				cellText.textComponent.fontSize = 16;
+				cellText.textComponent.color = Color.black;
+
+				dataCell.transform.SetAsLastSibling();
+			}
 		}
 	}
 
 	private void ClearTable()
 	{
-		for (int i = MAXROWSPAGE * currentColumns - 1; i >= 0; i--)
+		/*if (currentRows > 0)
 		{
-			Destroy(tabularDataWrapper.GetChild(i).gameObject);
+			for (int i = tabularDataWrapper.childCount - 1; i >= 0; i--)
+			{
+				Destroy(tabularDataWrapper.GetChild(i).gameObject);
+			}
+		}*/
+
+		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
+		if (rowLimit > currentRows)
+		{
+			rowLimit = currentRows;
+		}
+		for (int row = currentPage * MAXROWSPAGE; row < rowLimit; row++)
+		{
+			for (int column = 0; column < currentColumns; column++)
+			{
+				tabularDataWrapper.GetChild(row * currentColumns + column).gameObject.SetActive(false);
+			}
 		}
 	}
 
 	private void NextButtonClick()
 	{
+		/*ClearTable();
+
+		currentPage++;
+
+		if (currentPage == 1)
+		{
+			backButton.interactable = true;
+		}
+		if (currentPage + 1 == (currentRows + MAXROWSPAGE - 1) / MAXROWSPAGE)
+		{
+			nextButton.interactable = false;
+		}
+
+		PopulateTable();*/
+
 		ClearTable();
 
 		currentPage++;
@@ -119,11 +176,26 @@ public class TabularDataPanelSphere : MonoBehaviour
 			nextButton.interactable = false;
 		}
 
-		PopulateTable();
+		ActivateTableChildren();
 	}
 
 	private void BackButtonClick()
 	{
+		/*ClearTable();
+
+		currentPage--;
+
+		if (currentPage == 0)
+		{
+			backButton.interactable = false;
+		}
+		if (currentPage + 1 != (currentRows + MAXROWSPAGE - 1) / MAXROWSPAGE)
+		{
+			nextButton.interactable = true;
+		}
+
+		PopulateTable();*/
+
 		ClearTable();
 
 		currentPage--;
@@ -137,6 +209,22 @@ public class TabularDataPanelSphere : MonoBehaviour
 			nextButton.interactable = true;
 		}
 
-		PopulateTable();
+		ActivateTableChildren();
+	}	
+
+	private void ActivateTableChildren()
+	{
+		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
+		if (rowLimit > currentRows)
+		{
+			rowLimit = currentRows;
+		}
+		for (int row = currentPage * MAXROWSPAGE; row < rowLimit; row++)
+		{
+			for (int column = 0; column < currentColumns; column++)
+			{
+				tabularDataWrapper.GetChild(row * currentColumns + column).gameObject.SetActive(true);
+			}
+		}
 	}
 }
