@@ -7,46 +7,34 @@ using UnityEngine.UI;
 
 public class TabularDataPanelEditor : MonoBehaviour
 {
-	public Transform layoutPanelTransform;
 	public InputField title;
 	public RectTransform tabularDataWrapper;
 	public RectTransform tabularDataCellPrefab;
-	public ScrollRect scrollRect;
 
 	public Button addColumnButton;
 	public Button removeColumnButton;
 	public Button addRowButton;
 	public Button removeRowButton;
-	public Button doneButton;
 
 	public bool answered;
 	public string answerTitle;
 	public List<string> answerTabularData;
 
-	//NOTE(Jitse): use two dimensional or one dimensional list?
-	//private List<List<string>> tabularData;
 	private List<string> tabularData;
 	private int currentRows = 1;
 	private int currentColumns = 1;
 
-	//NOTE(Jitse): MAXCOLUMNS == 8 due to (current) width limitations.
 	private const int MAXCOLUMNS = 5;
 	private const int MAXROWS = 20;
-	private const float GRIDCELLSIZEX = 430;
-	private const float GRIDCELLSIZEY = 220;
 
 	private static Color errorColor = new Color(1, 0.8f, 0.8f, 1f);
-
 
 	public void Init(string initialTitle, List<string> initialTabularData = null)
 	{
 		if (initialTabularData == null || initialTabularData.Count < 1 || initialTabularData.Count > MAXROWS * MAXCOLUMNS)
 		{
-			initialTabularData = new List<string>() { "" };
-			var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
-			var cellText = dataCell.transform.GetComponentInChildren<InputField>();
-
-			dataCell.transform.SetAsLastSibling();
+			initialTabularData = new List<string> { "" };
+			Instantiate(tabularDataCellPrefab, tabularDataWrapper);
 		}
 		else
 		{
@@ -62,44 +50,19 @@ public class TabularDataPanelEditor : MonoBehaviour
 				}
 
 				cellText.text = newText;
+			}
 
-				dataCell.transform.SetAsLastSibling();
-			}
-			currentRows = Convert.ToInt32(initialTabularData[initialTabularData.Count - 1].Split(':')[0]);
-			currentColumns = Convert.ToInt32(initialTabularData[initialTabularData.Count - 1].Split(':')[1]);
 
-			if (currentRows >= 1)
-			{
-				removeRowButton.interactable = true;
-			}
-			if (currentRows == MAXROWS)
-			{
-				addRowButton.interactable = false;
-			}
-			if (currentColumns >= 1)
-			{
-				removeColumnButton.interactable = true;
-			}
-			if (currentColumns == MAXCOLUMNS)
-			{
-				addColumnButton.interactable = false;
-			}
+			var size = initialTabularData[initialTabularData.Count - 1].Split(':');
+			currentRows = Convert.ToInt32(size[0]);
+			currentColumns = Convert.ToInt32(size[1]);
 
 			initialTabularData.RemoveAt(initialTabularData.Count - 1);
 
-			float cellSizeX = GRIDCELLSIZEX / currentColumns;
-			float cellSizeY = GRIDCELLSIZEY / currentRows;
-
-			if (cellSizeY < 50)
-			{
-				cellSizeY = 50;
-			}
-			if (cellSizeX < 50)
-			{
-				cellSizeX = 50;
-			}
-			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = new Vector2(cellSizeX, cellSizeY);
+			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
 		}
+
+		SetButtonStates();
 
 		tabularData = initialTabularData;
 
@@ -110,167 +73,68 @@ public class TabularDataPanelEditor : MonoBehaviour
 
 	public void AddRow()
 	{
-		if (currentRows < MAXROWS)
+		currentRows++;
+
+		int dataCountOld = tabularDataWrapper.childCount;
+		for (int i = 0; i < currentColumns * currentRows - dataCountOld; i++)
 		{
-			if (currentRows == 1)
-			{
-				removeRowButton.interactable = true;
-			}
-
-			currentRows++;
-
-			int dataCountOld = tabularData.Count;
-			for (int i = 0; i < currentColumns*currentRows - dataCountOld; i++)
-			{
-				tabularData.Add("");
-				var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
-				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
-
-				dataCell.transform.SetAsLastSibling();
-			}
-
-			if (currentRows == MAXROWS)
-			{
-				addRowButton.interactable = false;
-			}
-
-			float cellSizeX = GRIDCELLSIZEX / currentColumns;
-			float cellSizeY = GRIDCELLSIZEY / currentRows;
-
-			if (cellSizeY < 50)
-			{
-				cellSizeY = 50;
-			}
-			if (cellSizeX < 50)
-			{
-				cellSizeX = 50;
-			}
-			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = new Vector2(cellSizeX, cellSizeY);
+			Instantiate(tabularDataCellPrefab, tabularDataWrapper);
 		}
+
+		SetButtonStates();
+
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
 	}
 
 	public void RemoveRow()
 	{
-		if (currentRows > 1)
+		int dataCountOld = tabularDataWrapper.childCount;
+		for (int i = dataCountOld - 1; i >= currentColumns * (currentRows - 1); i--)
 		{
-			var dataCells = tabularDataWrapper.GetComponentsInChildren<RectTransform>();
-
-			if (currentRows == MAXROWS)
-			{
-				addRowButton.interactable = true;
-			}
-
-			int dataCountOld = tabularData.Count;
-			for (int i = dataCountOld - 1; i >= currentColumns * (currentRows - 1); i--)
-			{
-				tabularData.RemoveAt(i);
-				Destroy(tabularDataWrapper.GetChild(i).gameObject);
-			}
-
-			currentRows--;
-
-			if (currentRows == 1)
-			{
-				removeRowButton.interactable = false;
-			}
-
-			float cellSizeX = GRIDCELLSIZEX / currentColumns;
-			float cellSizeY = GRIDCELLSIZEY / currentRows;
-
-			if (cellSizeY < 50)
-			{
-				cellSizeY = 50;
-			}
-			if (cellSizeX < 50)
-			{
-				cellSizeX = 50;
-			}
-			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = new Vector2(cellSizeX, cellSizeY);
+			Destroy(tabularDataWrapper.GetChild(i).gameObject);
 		}
+
+		currentRows--;
+
+		SetButtonStates();
+
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
 	}
 
 	public void AddColumn()
 	{
-		if (currentColumns < MAXCOLUMNS)
+		for (int i = currentColumns; i <= tabularDataWrapper.childCount; i += currentColumns)
 		{
-			if (currentColumns == 1)
-			{
-				removeColumnButton.interactable = true;
-			}
+			var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
 
-			int dataCountOld = tabularData.Count;
-			for (int i = currentColumns; i <= tabularData.Count; i = i + currentColumns)
-			{
-				tabularData.Insert(i, "");
-				var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
-				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
-
-				dataCell.transform.SetSiblingIndex(i);
-				i++;
-			}
-
-			currentColumns++;
-
-			if (currentColumns == MAXCOLUMNS)
-			{
-				addColumnButton.interactable = false;
-			}
-
-			float cellSizeX = GRIDCELLSIZEX / currentColumns;
-			float cellSizeY = GRIDCELLSIZEY / currentRows;
-
-			if (cellSizeY < 50)
-			{
-				cellSizeY = 50;
-			}
-			if (cellSizeX < 50)
-			{
-				cellSizeX = 50;
-			}
-			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = new Vector2(cellSizeX, cellSizeY);
+			dataCell.transform.SetSiblingIndex(i);
+			i++;
 		}
+
+		currentColumns++;
+
+		SetButtonStates();
+
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
 	}
 
 	public void RemoveColumn()
 	{
-		if (currentColumns > 1)
+		int dataCountOld = tabularDataWrapper.childCount;
+		for (int i = dataCountOld - 1; i >= 0; i--)
 		{
-			var dataCells = tabularDataWrapper.GetComponentsInChildren<RectTransform>();
-			if (currentColumns == MAXCOLUMNS)
+			//NOTE(Jitse): Remove last cell per row
+			if ((i + 1) % currentColumns == 0)
 			{
-				addColumnButton.interactable = true;
+				Destroy(tabularDataWrapper.GetChild(i).gameObject);
 			}
-
-			int dataCountOld = tabularData.Count;
-			for (int i = dataCountOld - 1; i >= 0; i--)
-			{
-				 if ((i + 1) % currentColumns == 0)
-				{
-					tabularData.RemoveAt(i);
-					Destroy(tabularDataWrapper.GetChild(i).gameObject);
-				}
-			}
-
-			currentColumns--;
-
-			if (currentColumns == 1)
-			{
-				removeColumnButton.interactable = false;
-			}
-
-			float cellSizeX = GRIDCELLSIZEX / currentColumns;
-			float cellSizeY = GRIDCELLSIZEY / currentRows;
-
-			if (cellSizeY < 50)
-            {
-				cellSizeY = 50;
-            }
-			if (cellSizeX < 50)
-            {
-				cellSizeX = 50;
-            }
-			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = new Vector2(cellSizeX, cellSizeY);
 		}
+
+		currentColumns--;
+
+		SetButtonStates();
+
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
 	}
 
 	public void Answer()
@@ -283,7 +147,7 @@ public class TabularDataPanelEditor : MonoBehaviour
 			errors = true;
 		}
 
-		Encoding asciiEncoding = Encoding.ASCII;
+		//TODO(Jitse): Encoding stuff
 		for (int i = 0; i < tabularData.Count; i++)
 		{
 			var input = tabularDataWrapper.GetChild(i).gameObject;
@@ -299,8 +163,27 @@ public class TabularDataPanelEditor : MonoBehaviour
 			answered = true;
 			answerTitle = title.text;
 			answerTabularData = tabularData;
-			answerTabularData.Add(currentRows.ToString() + ":" + currentColumns.ToString());
+			answerTabularData.Add(currentRows + ":" + currentColumns);
 		}
+	}
+
+	public Vector2 EnsureMinSize(int columns, int rows)
+	{
+		float minGridCellSizeX = 50;
+		float minGridCellSizeY = 50;
+		float availableSpaceX = 430;
+		float availableSpaceY = 220;
+
+		return new Vector2(Mathf.Max(availableSpaceX / columns, minGridCellSizeX),
+							Mathf.Max(availableSpaceY / rows, minGridCellSizeY));
+	}
+
+	public void SetButtonStates()
+	{
+		removeRowButton.interactable = currentRows > 1;
+		addRowButton.interactable = currentRows < MAXROWS;
+		removeColumnButton.interactable = currentColumns > 1;
+		addColumnButton.interactable = currentColumns < MAXCOLUMNS;
 	}
 
 	public void OnInputChangeColor(InputField input)
