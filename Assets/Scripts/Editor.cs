@@ -699,7 +699,7 @@ public class Editor : MonoBehaviour
 
 						finished = true;
 					}
-						break;
+					break;
 				}
 				default:
 				{
@@ -1079,6 +1079,9 @@ public class Editor : MonoBehaviour
 					SetEditorActive(true);
 					Destroy(projectPanel.gameObject);
 					Canvass.modalBackground.SetActive(false);
+
+					pinnedHoverPoint = null;
+
 					InitExtrasList();
 					//NOTE(Simon): When opening a project, any previous to-be-deleted-or-copied files are not relevant anymore. So clear them
 					CleanExtras();

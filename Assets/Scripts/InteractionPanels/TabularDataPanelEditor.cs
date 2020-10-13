@@ -20,7 +20,6 @@ public class TabularDataPanelEditor : MonoBehaviour
 	public string answerTitle;
 	public List<string> answerTabularData;
 
-	private List<string> tabularData;
 	private int currentRows = 1;
 	private int currentColumns = 1;
 
@@ -63,8 +62,6 @@ public class TabularDataPanelEditor : MonoBehaviour
 		}
 
 		SetButtonStates();
-
-		tabularData = initialTabularData;
 
 		title.text = initialTitle;
 
@@ -147,14 +144,16 @@ public class TabularDataPanelEditor : MonoBehaviour
 			errors = true;
 		}
 
+		answerTabularData = new List<string>(tabularDataWrapper.childCount);
+
 		//TODO(Jitse): Encoding stuff
-		for (int i = 0; i < tabularData.Count; i++)
+		for (int i = 0; i < tabularDataWrapper.childCount; i++)
 		{
 			var input = tabularDataWrapper.GetChild(i).gameObject;
-			tabularData[i] = input.GetComponentInChildren<InputField>().text;
-			if (tabularData[i].Contains(','))
+			answerTabularData.Add(input.GetComponentInChildren<InputField>().text);
+			if (answerTabularData[i].Contains(','))
 			{
-				tabularData[i] = tabularData[i].Replace(",", "//comma//");
+				answerTabularData[i] = answerTabularData[i].Replace(",", "//comma//");
 			}
 		}
 
@@ -162,7 +161,6 @@ public class TabularDataPanelEditor : MonoBehaviour
 		{
 			answered = true;
 			answerTitle = title.text;
-			answerTabularData = tabularData;
 			answerTabularData.Add(currentRows + ":" + currentColumns);
 		}
 	}
