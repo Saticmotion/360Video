@@ -1,27 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TabularDataPanelSphere : MonoBehaviour
 {
 	public Text title;
-	public List<string> tabularData;
+	public string[] tabularData;
 	public RectTransform tabularDataWrapper;
 	public RectTransform tabularDataCellPrefab;
 	public RectTransform scrollPanel;
 	public Button backButton;
 	public Button nextButton;
 
-	private int currentColumns = 0;
-	private int currentRows = 0;
-	private int currentPage = 0;
+	private int currentColumns;
+	private int currentRows;
+	private int currentPage;
+	private int maxPages;
 
-	private const float GRIDCELLSIZEX = 430;
-	private const float GRIDCELLSIZEY = 220;
-	private const int MAXROWSPAGE = 5;
+	private const int MAXROWSPAGE = 7;
+	private const float MIN_GRID_SIZE_X = 50;
+	private const float MIN_GRID_SIZE_Y = 50;
 
-	public void Init(string newTitle, List<string> newTabularData)
+	public void Init(string newTitle, int rows, int columns, string[] newTabularData)
 	{
 		backButton.onClick.AddListener(BackButtonClick);
 		nextButton.onClick.AddListener(NextButtonClick);
@@ -31,36 +31,25 @@ public class TabularDataPanelSphere : MonoBehaviour
 		title.text = newTitle;
 		tabularData = newTabularData;
 
-		if (newTabularData != null && newTabularData.Count > 0)
+		if (newTabularData != null && newTabularData.Length > 0)
 		{
-			if (tabularData[tabularData.Count - 1].Contains(":"))
-			{
-				var rowsColumns = tabularData[tabularData.Count - 1].Split(':');
-				currentRows = Convert.ToInt32(rowsColumns[0]);
-				currentColumns = Convert.ToInt32(rowsColumns[1]);
-			}
+			currentRows = rows;
+			currentColumns = columns;
+			maxPages = Mathf.CeilToInt((float)currentRows / MAXROWSPAGE);
+		}
+		else
+		{
+			Toasts.AddToast(5, "File is corrupt");
+			return;
 		}
 
-		backButton.interactable = false;
-		if (currentRows <= MAXROWSPAGE)
-		{
-			nextButton.interactable = false;
-		}
-
+		SetButtonStates();
 		PopulateTable();
 
 		tabularDataWrapper.GetComponent<GridLayoutGroup2>().constraintCount = currentColumns;
-		float cellSizeX = scrollPanel.rect.width / currentColumns;
-		float cellSizeY = GRIDCELLSIZEY / currentRows;
+		float cellSizeX = Mathf.Max(scrollPanel.rect.width / currentColumns, MIN_GRID_SIZE_X);
+		float cellSizeY = Mathf.Max(scrollPanel.rect.height / currentRows, MIN_GRID_SIZE_Y);
 
-		if (cellSizeY < 50)
-		{
-			cellSizeY = 50;
-		}
-		if (cellSizeX < 50)
-		{
-			cellSizeX = 50;
-		}
 		tabularDataWrapper.GetComponent<GridLayoutGroup2>().cellSize = new Vector2(cellSizeX, cellSizeY);
 	}
 
@@ -68,33 +57,6 @@ public class TabularDataPanelSphere : MonoBehaviour
 	//TODO(cont.): Uncomment the parts from here on out to destroy objects (and then also delete the uncommented code.)
 	private void PopulateTable()
 	{
-		/*int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
-		if (rowLimit > currentRows)
-		{
-			rowLimit = currentRows;
-		}
-		for (int row = currentPage * MAXROWSPAGE; row < rowLimit; row++)
-		{
-			for (int column = 0; column < currentColumns; column++)
-			{
-				var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
-				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
-				cellText.interactable = false;
-				string newText = tabularData[row * currentColumns + column];
-
-				if (newText.Contains("//comma//"))
-				{
-					newText = newText.Replace("//comma//", ",");
-				}
-
-				cellText.text = newText;
-				cellText.textComponent.fontSize = 16;
-				cellText.textComponent.color = Color.black;
-
-				dataCell.transform.SetAsLastSibling();
-			}
-		}*/
-
 		for (int row = 0; row < currentRows; row++)
 		{
 			for (int column = 0; column < currentColumns; column++)
@@ -106,14 +68,8 @@ public class TabularDataPanelSphere : MonoBehaviour
 				}
 				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
 				cellText.interactable = false;
-				string newText = tabularData[row * currentColumns + column];
 
-				if (newText.Contains("//comma//"))
-				{
-					newText = newText.Replace("//comma//", ",");
-				}
-
-				cellText.text = newText;
+				cellText.text = tabularData[row * currentColumns + column];
 				cellText.textComponent.fontSize = 16;
 				cellText.textComponent.color = Color.black;
 
@@ -124,14 +80,6 @@ public class TabularDataPanelSphere : MonoBehaviour
 
 	private void ClearTable()
 	{
-		/*if (currentRows > 0)
-		{
-			for (int i = tabularDataWrapper.childCount - 1; i >= 0; i--)
-			{
-				Destroy(tabularDataWrapper.GetChild(i).gameObject);
-			}
-		}*/
-
 		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
 		if (rowLimit > currentRows)
 		{
@@ -148,67 +96,19 @@ public class TabularDataPanelSphere : MonoBehaviour
 
 	private void NextButtonClick()
 	{
-		/*ClearTable();
-
-		currentPage++;
-
-		if (currentPage == 1)
-		{
-			backButton.interactable = true;
-		}
-		if (currentPage + 1 == (currentRows + MAXROWSPAGE - 1) / MAXROWSPAGE)
-		{
-			nextButton.interactable = false;
-		}
-
-		PopulateTable();*/
-
 		ClearTable();
 
 		currentPage++;
-
-		if (currentPage == 1)
-		{
-			backButton.interactable = true;
-		}
-		if (currentPage + 1 == (currentRows + MAXROWSPAGE - 1) / MAXROWSPAGE)
-		{
-			nextButton.interactable = false;
-		}
-
+		SetButtonStates();
 		ActivateTableChildren();
 	}
 
 	private void BackButtonClick()
 	{
-		/*ClearTable();
-
-		currentPage--;
-
-		if (currentPage == 0)
-		{
-			backButton.interactable = false;
-		}
-		if (currentPage + 1 != (currentRows + MAXROWSPAGE - 1) / MAXROWSPAGE)
-		{
-			nextButton.interactable = true;
-		}
-
-		PopulateTable();*/
-
 		ClearTable();
 
 		currentPage--;
-
-		if (currentPage == 0)
-		{
-			backButton.interactable = false;
-		}
-		if (currentPage + 1 != (currentRows + MAXROWSPAGE - 1) / MAXROWSPAGE)
-		{
-			nextButton.interactable = true;
-		}
-
+		SetButtonStates();
 		ActivateTableChildren();
 	}	
 
@@ -226,5 +126,11 @@ public class TabularDataPanelSphere : MonoBehaviour
 				tabularDataWrapper.GetChild(row * currentColumns + column).gameObject.SetActive(true);
 			}
 		}
+	}
+
+	private void SetButtonStates()
+	{
+		backButton.interactable = currentPage > 0;
+		nextButton.interactable = currentPage < maxPages - 1;
 	}
 }

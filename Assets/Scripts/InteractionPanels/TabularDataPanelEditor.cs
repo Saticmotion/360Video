@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,45 +18,35 @@ public class TabularDataPanelEditor : MonoBehaviour
 	public string answerTitle;
 	public List<string> answerTabularData;
 
-	private int currentRows = 1;
-	private int currentColumns = 1;
+	public int answerRows = 1;
+	public int answerColumns = 1;
 
 	private const int MAXCOLUMNS = 5;
 	private const int MAXROWS = 20;
 
 	private static Color errorColor = new Color(1, 0.8f, 0.8f, 1f);
 
-	public void Init(string initialTitle, List<string> initialTabularData = null)
+	public void Init(string initialTitle, int rows, int columns, List<string> initialTabularData = null)
 	{
 		if (initialTabularData == null || initialTabularData.Count < 1 || initialTabularData.Count > MAXROWS * MAXCOLUMNS)
 		{
-			initialTabularData = new List<string> { "" };
 			Instantiate(tabularDataCellPrefab, tabularDataWrapper);
 		}
 		else
 		{
-			for (int i = 0; i < initialTabularData.Count - 1; i++)
+			for (int i = 0; i < initialTabularData.Count; i++)
 			{
 				var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
 				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
 				string newText = initialTabularData[i];
 
-				if (newText.Contains("//comma//"))
-				{
-					newText = newText.Replace("//comma//", ",");
-				}
-
 				cellText.text = newText;
 			}
 
+			answerRows = rows;
+			answerColumns = columns;
 
-			var size = initialTabularData[initialTabularData.Count - 1].Split(':');
-			currentRows = Convert.ToInt32(size[0]);
-			currentColumns = Convert.ToInt32(size[1]);
-
-			initialTabularData.RemoveAt(initialTabularData.Count - 1);
-
-			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
+			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(answerColumns, answerRows);
 		}
 
 		SetButtonStates();
@@ -70,37 +58,37 @@ public class TabularDataPanelEditor : MonoBehaviour
 
 	public void AddRow()
 	{
-		currentRows++;
+		answerRows++;
 
 		int dataCountOld = tabularDataWrapper.childCount;
-		for (int i = 0; i < currentColumns * currentRows - dataCountOld; i++)
+		for (int i = 0; i < answerColumns * answerRows - dataCountOld; i++)
 		{
 			Instantiate(tabularDataCellPrefab, tabularDataWrapper);
 		}
 
 		SetButtonStates();
 
-		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(answerColumns, answerRows);
 	}
 
 	public void RemoveRow()
 	{
 		int dataCountOld = tabularDataWrapper.childCount;
-		for (int i = dataCountOld - 1; i >= currentColumns * (currentRows - 1); i--)
+		for (int i = dataCountOld - 1; i >= answerColumns * (answerRows - 1); i--)
 		{
 			Destroy(tabularDataWrapper.GetChild(i).gameObject);
 		}
 
-		currentRows--;
+		answerRows--;
 
 		SetButtonStates();
 
-		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(answerColumns, answerRows);
 	}
 
 	public void AddColumn()
 	{
-		for (int i = currentColumns; i <= tabularDataWrapper.childCount; i += currentColumns)
+		for (int i = answerColumns; i <= tabularDataWrapper.childCount; i += answerColumns)
 		{
 			var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
 
@@ -108,11 +96,11 @@ public class TabularDataPanelEditor : MonoBehaviour
 			i++;
 		}
 
-		currentColumns++;
+		answerColumns++;
 
 		SetButtonStates();
 
-		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(answerColumns, answerRows);
 	}
 
 	public void RemoveColumn()
@@ -121,17 +109,17 @@ public class TabularDataPanelEditor : MonoBehaviour
 		for (int i = dataCountOld - 1; i >= 0; i--)
 		{
 			//NOTE(Jitse): Remove last cell per row
-			if ((i + 1) % currentColumns == 0)
+			if ((i + 1) % answerColumns == 0)
 			{
 				Destroy(tabularDataWrapper.GetChild(i).gameObject);
 			}
 		}
 
-		currentColumns--;
+		answerColumns--;
 
 		SetButtonStates();
 
-		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(currentColumns, currentRows);
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(answerColumns, answerRows);
 	}
 
 	public void Answer()
@@ -151,17 +139,12 @@ public class TabularDataPanelEditor : MonoBehaviour
 		{
 			var input = tabularDataWrapper.GetChild(i).gameObject;
 			answerTabularData.Add(input.GetComponentInChildren<InputField>().text);
-			if (answerTabularData[i].Contains(','))
-			{
-				answerTabularData[i] = answerTabularData[i].Replace(",", "//comma//");
-			}
 		}
 
 		if (!errors)
 		{
 			answered = true;
 			answerTitle = title.text;
-			answerTabularData.Add(currentRows + ":" + currentColumns);
 		}
 	}
 
@@ -178,10 +161,10 @@ public class TabularDataPanelEditor : MonoBehaviour
 
 	public void SetButtonStates()
 	{
-		removeRowButton.interactable = currentRows > 1;
-		addRowButton.interactable = currentRows < MAXROWS;
-		removeColumnButton.interactable = currentColumns > 1;
-		addColumnButton.interactable = currentColumns < MAXCOLUMNS;
+		removeRowButton.interactable = answerRows > 1;
+		addRowButton.interactable = answerRows < MAXROWS;
+		removeColumnButton.interactable = answerColumns > 1;
+		addColumnButton.interactable = answerColumns < MAXCOLUMNS;
 	}
 
 	public void OnInputChangeColor(InputField input)

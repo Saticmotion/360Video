@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -435,7 +434,7 @@ public class Editor : MonoBehaviour
 						}
 						case InteractionType.TabularData:
 							interactionEditor = Instantiate(UIPanels.Instance.tabularDataPanelEditor, Canvass.main.transform).gameObject;
-							interactionEditor.GetComponent<TabularDataPanelEditor>().Init("", new List<string>());
+							interactionEditor.GetComponent<TabularDataPanelEditor>().Init("", 1, 1, new List<string>());
 							break;
 						default:
 						{
@@ -690,12 +689,13 @@ public class Editor : MonoBehaviour
 					{
 						var panel = Instantiate(UIPanels.Instance.tabularDataPanel, Canvass.main.transform);
 						lastPlacedPoint.title = editor.answerTitle;
-						lastPlacedPoint.body = string.Join(",", editor.answerTabularData);
-						//NOTE(Kristof): \f is used as a split character to divide the string into an array
+						//NOTE(Jitse): \f is used as a split character to divide the string into an array
+						lastPlacedPoint.body = $"{editor.answerRows}\f{editor.answerColumns}\f";
+						lastPlacedPoint.body += string.Join("\f", editor.answerTabularData);
 						lastPlacedPoint.panel = panel.gameObject;
 
-						//NOTE(Kristof): Init after building the correct body string because the function expect the correct answer index to be passed with the string
-						panel.Init(editor.answerTitle, editor.answerTabularData);
+						//NOTE(Jitse): Init after building the correct body string because the function expect the correct answer index to be passed with the string
+						panel.Init(editor.answerTitle, editor.answerRows, editor.answerColumns, editor.answerTabularData);
 
 						finished = true;
 					}
@@ -978,10 +978,12 @@ public class Editor : MonoBehaviour
 					{
 						var panel = pointToEdit.panel.GetComponent<TabularDataPanel>();
 						pointToEdit.title = editor.answerTitle;
-						pointToEdit.body = string.Join(",", editor.answerTabularData);
+						//NOTE(Jitse): \f is used as a split character to divide the string into an array
+						pointToEdit.body = $"{editor.answerRows}\f{editor.answerColumns}\f";
+						pointToEdit.body += string.Join("\f", editor.answerTabularData);
 						pointToEdit.panel = panel.gameObject;
 
-						panel.Init(editor.answerTitle, editor.answerTabularData);
+						panel.Init(editor.answerTitle, editor.answerRows, editor.answerColumns, editor.answerTabularData);
 						finished = true;
 					}
 					break;
@@ -1668,7 +1670,11 @@ public class Editor : MonoBehaviour
 					case InteractionType.TabularData:
 					{
 						interactionEditor = Instantiate(UIPanels.Instance.tabularDataPanelEditor, Canvass.main.transform).gameObject;
-						interactionEditor.GetComponent<TabularDataPanelEditor>().Init(point.title, point.body.Split(',').ToList());
+						string[] body = point.body.Split(new[] { '\f' }, 3);
+						int rows = Int32.Parse(body[0]);
+						int columns = Int32.Parse(body[1]);
+
+						interactionEditor.GetComponent<TabularDataPanelEditor>().Init(point.title, rows, columns, new List<string>(body[2].Split('\f')));
 						break;
 					}
 					default:
@@ -2221,6 +2227,7 @@ public class Editor : MonoBehaviour
 				case InteractionType.MultipleChoice:
 				{
 					var panel = Instantiate(UIPanels.Instance.multipleChoicePanel, Canvass.main.transform);
+					//TODO(Simon): SPlit here, not in panel
 					panel.Init(newInteractionPoint.title, newInteractionPoint.body.Split('\f'));
 					newInteractionPoint.panel = panel.gameObject;
 					break;
@@ -2278,7 +2285,11 @@ public class Editor : MonoBehaviour
 				case InteractionType.TabularData:
 				{
 					var panel = Instantiate(UIPanels.Instance.tabularDataPanel, Canvass.main.transform);
-					panel.Init(newInteractionPoint.title, newInteractionPoint.body.Split(',').ToList());
+					string[] body = newInteractionPoint.body.Split(new[] { '\f' }, 3);
+					int rows = Int32.Parse(body[0]);
+					int columns = Int32.Parse(body[1]);
+
+					panel.Init(newInteractionPoint.title, rows, columns, new List<string>(body[2].Split('\f')));
 					newInteractionPoint.panel = panel.gameObject;
 					break;
 				}

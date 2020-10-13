@@ -2,14 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.XR;
 using Valve.VR;
-using Object = UnityEngine.Object;
 
 public enum PlayerState
 {
@@ -561,10 +558,14 @@ public class Player : MonoBehaviour
 				case InteractionType.TabularData:
 				{
 					var panel = Instantiate(tabularDataPanelPrefab, Canvass.sphereUIPanelWrapper.transform);
-					panel.GetComponent<TabularDataPanelSphere>().Init(newInteractionPoint.title, newInteractionPoint.body.Split(',').ToList());
+					string[] body = newInteractionPoint.body.Split(new[] { '\f' }, 3);
+					int rows = Int32.Parse(body[0]);
+					int columns = Int32.Parse(body[1]);
+
+					panel.GetComponent<TabularDataPanelSphere>().Init(newInteractionPoint.title, rows, columns, body[2].Split('\f'));
 					newInteractionPoint.panel = panel;
 					break;
-					}
+				}
 				default:
 				{
 					isValidPoint = false;

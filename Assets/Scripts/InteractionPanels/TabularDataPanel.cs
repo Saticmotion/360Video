@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,9 +18,9 @@ public class TabularDataPanel : MonoBehaviour
 	private const float MIN_GRID_SIZE_X = 50;
 	private const float MIN_GRID_SIZE_Y = 50;
 
-	public void Init(string newTitle, List<string> newTabularData)
+	public void Init(string newTitle, int rows, int columns, List<string> newTabularData)
 	{
-		for (int i = tabularData.Count - 2; i >= 0; i--)
+		for (int i = tabularData.Count - 1; i >= 0; i--)
 		{
 			Destroy(tabularDataWrapper.GetChild(i).gameObject);
 		}
@@ -30,12 +30,8 @@ public class TabularDataPanel : MonoBehaviour
 
 		if (newTabularData != null && newTabularData.Count > 0)
 		{
-			if (tabularData[tabularData.Count - 1].Contains(":"))
-			{
-				var rowsColumns = tabularData[tabularData.Count - 1].Split(':');
-				currentRows = Convert.ToInt32(rowsColumns[0]);
-				currentColumns = Convert.ToInt32(rowsColumns[1]);
-			}
+			currentRows = rows;
+			currentColumns = columns;
 		}
 
 		for (int row = 0; row < currentRows; row++)
@@ -45,14 +41,8 @@ public class TabularDataPanel : MonoBehaviour
 				var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
 				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
 				cellText.interactable = false;
-				string newText = tabularData[row * currentColumns + column];
 
-				if (newText.Contains("//comma//"))
-				{
-					newText = newText.Replace("//comma//", ",");
-				}
-
-				cellText.text = newText;
+				cellText.text = tabularData[row * currentColumns + column];
 
 				dataCell.transform.SetAsLastSibling();
 			}
