@@ -28,26 +28,15 @@ public class TabularDataPanelEditor : MonoBehaviour
 
 	public void Init(string initialTitle, int rows, int columns, List<string> initialTabularData = null)
 	{
-		if (initialTabularData == null || initialTabularData.Count < 1 || initialTabularData.Count > MAXROWS * MAXCOLUMNS)
+		//NOTE(Jitse): Check to see if data not corrupt.
+		if (!(initialTabularData == null || initialTabularData.Count < 1 || initialTabularData.Count > MAXROWS * MAXCOLUMNS))
 		{
-			Instantiate(tabularDataCellPrefab, tabularDataWrapper);
-		}
-		else
-		{
-			for (int i = 0; i < initialTabularData.Count; i++)
-			{
-				var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
-				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
-				string newText = initialTabularData[i];
-
-				cellText.text = newText;
-			}
-
 			answerRows = rows;
 			answerColumns = columns;
-
-			tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(answerColumns, answerRows);
 		}
+
+		PopulateTable(initialTabularData);
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(answerColumns, answerRows);
 
 		SetButtonStates();
 
@@ -56,15 +45,39 @@ public class TabularDataPanelEditor : MonoBehaviour
 		title.onValueChanged.AddListener(_ => OnInputChangeColor(title));
 	}
 
+	private void PopulateTable(List<string> tabularData)
+	{
+		int counter = 0;
+		for (int row = 0; row < MAXROWS; row++)
+		{
+			for (int column = 0; column < MAXCOLUMNS; column++)
+			{
+				var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
+				if (row < answerRows && column < answerColumns)
+				{
+					var cellText = dataCell.transform.GetComponentInChildren<InputField>();
+
+					if (tabularData.Count != 0)
+					{
+						cellText.text = tabularData[counter];
+						counter++;
+					}
+				}
+				else
+				{
+					dataCell.gameObject.SetActive(false);
+				}
+			}
+		}
+	}
 	public void AddRow()
 	{
-		answerRows++;
-
-		int dataCountOld = tabularDataWrapper.childCount;
-		for (int i = 0; i < answerColumns * answerRows - dataCountOld; i++)
+		for (int i = answerRows * MAXCOLUMNS; i < answerRows * MAXCOLUMNS + answerColumns; i++)
 		{
-			Instantiate(tabularDataCellPrefab, tabularDataWrapper);
+			tabularDataWrapper.GetChild(i).gameObject.SetActive(true);
 		}
+
+		answerRows++;
 
 		SetButtonStates();
 
@@ -73,13 +86,12 @@ public class TabularDataPanelEditor : MonoBehaviour
 
 	public void RemoveRow()
 	{
-		int dataCountOld = tabularDataWrapper.childCount;
-		for (int i = dataCountOld - 1; i >= answerColumns * (answerRows - 1); i--)
-		{
-			Destroy(tabularDataWrapper.GetChild(i).gameObject);
-		}
-
 		answerRows--;
+
+		for (int i = answerRows * MAXCOLUMNS; i < answerRows * MAXCOLUMNS + answerColumns; i++)
+		{
+			tabularDataWrapper.GetChild(i).gameObject.SetActive(false);
+		}
 
 		SetButtonStates();
 
@@ -88,12 +100,10 @@ public class TabularDataPanelEditor : MonoBehaviour
 
 	public void AddColumn()
 	{
-		for (int i = answerColumns; i <= tabularDataWrapper.childCount; i += answerColumns)
+		for (int i = 0; i < answerRows; i++)
 		{
-			var dataCell = Instantiate(tabularDataCellPrefab, tabularDataWrapper);
-
-			dataCell.transform.SetSiblingIndex(i);
-			i++;
+			int columnIndex = i * MAXCOLUMNS + answerColumns;
+			tabularDataWrapper.GetChild(columnIndex).gameObject.SetActive(true);
 		}
 
 		answerColumns++;
@@ -105,17 +115,13 @@ public class TabularDataPanelEditor : MonoBehaviour
 
 	public void RemoveColumn()
 	{
-		int dataCountOld = tabularDataWrapper.childCount;
-		for (int i = dataCountOld - 1; i >= 0; i--)
-		{
-			//NOTE(Jitse): Remove last cell per row
-			if ((i + 1) % answerColumns == 0)
-			{
-				Destroy(tabularDataWrapper.GetChild(i).gameObject);
-			}
-		}
-
 		answerColumns--;
+
+		for (int i = 0; i < answerRows; i++)
+		{
+			int columnIndex = i * MAXCOLUMNS + answerColumns;
+			tabularDataWrapper.GetChild(columnIndex).gameObject.SetActive(false);
+		}
 
 		SetButtonStates();
 
@@ -138,7 +144,10 @@ public class TabularDataPanelEditor : MonoBehaviour
 		for (int i = 0; i < tabularDataWrapper.childCount; i++)
 		{
 			var input = tabularDataWrapper.GetChild(i).gameObject;
-			answerTabularData.Add(input.GetComponentInChildren<InputField>().text);
+			if (input.activeInHierarchy)
+			{
+				answerTabularData.Add(input.GetComponentInChildren<InputField>().text);
+			}
 		}
 
 		if (!errors)
