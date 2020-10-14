@@ -8,6 +8,8 @@ public class TabularDataPanelEditor : MonoBehaviour
 	public InputField title;
 	public RectTransform tabularDataWrapper;
 	public RectTransform tabularDataCellPrefab;
+	public RectTransform rowNumbersWrapper;
+	public RectTransform rowNumberTextPrefab;
 
 	public Button addColumnButton;
 	public Button removeColumnButton;
@@ -68,6 +70,15 @@ public class TabularDataPanelEditor : MonoBehaviour
 					dataCell.gameObject.SetActive(false);
 				}
 			}
+
+			//NOTE(Jitse): Add row numbers
+			var rowNumberText = Instantiate(rowNumberTextPrefab, rowNumbersWrapper);
+			rowNumberText.GetComponent<Text>().text = $"{row + 1}";
+
+			if (row >= answerRows)
+			{
+				rowNumberText.gameObject.SetActive(false);
+			}
 		}
 	}
 	public void AddRow()
@@ -76,6 +87,8 @@ public class TabularDataPanelEditor : MonoBehaviour
 		{
 			tabularDataWrapper.GetChild(i).gameObject.SetActive(true);
 		}
+
+		rowNumbersWrapper.GetChild(answerRows).gameObject.SetActive(true);
 
 		answerRows++;
 
@@ -92,6 +105,8 @@ public class TabularDataPanelEditor : MonoBehaviour
 		{
 			tabularDataWrapper.GetChild(i).gameObject.SetActive(false);
 		}
+
+		rowNumbersWrapper.GetChild(answerRows).gameObject.SetActive(false);
 
 		SetButtonStates();
 
@@ -161,7 +176,7 @@ public class TabularDataPanelEditor : MonoBehaviour
 	{
 		float minGridCellSizeX = 50;
 		float minGridCellSizeY = 50;
-		float availableSpaceX = 430;
+		float availableSpaceX = 410;
 		float availableSpaceY = 220;
 
 		return new Vector2(Mathf.Max(availableSpaceX / columns, minGridCellSizeX),
