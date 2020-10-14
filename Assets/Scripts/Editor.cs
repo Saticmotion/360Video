@@ -1582,6 +1582,12 @@ public class Editor : MonoBehaviour
 					SetExtrasToDeleted(file);
 				}
 
+				//NOTE(Jitse): If the point was pinned, pinnedHoverPoint must also be updated to null.
+				if (pinnedHoverPoint == point)
+				{
+					pinnedHoverPoint = null;
+				}
+
 				//NOTE(Simon): Actually remove the point, and all associated data
 				RemoveItemFromTimeline(point);
 				Destroy(point.point);

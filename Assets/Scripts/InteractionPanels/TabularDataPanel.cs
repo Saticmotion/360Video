@@ -9,11 +9,13 @@ public class TabularDataPanel : MonoBehaviour
 	public List<string> tabularData;
 	public RectTransform tabularDataWrapper;
 	public RectTransform tabularDataCellPrefab;
+	public RectTransform rowNumbersWrapper;
+	public RectTransform rowNumberTextPrefab;
 	public ScrollRect tabularDataScroller;
 
 	private int currentColumns;
 	private int currentRows;
-	private const float GRID_CELL_SIZE_X = 470;
+	private const float GRID_CELL_SIZE_X = 448;
 	private const float GRID_CELL_SIZE_Y = 220;
 	private const float MIN_GRID_SIZE_X = 50;
 	private const float MIN_GRID_SIZE_Y = 50;
@@ -46,6 +48,10 @@ public class TabularDataPanel : MonoBehaviour
 
 				dataCell.transform.SetAsLastSibling();
 			}
+
+			//NOTE(Jitse): Add row numbers
+			var rowNumberText = Instantiate(rowNumberTextPrefab, rowNumbersWrapper);
+			rowNumberText.GetComponent<Text>().text = $"{row + 1}";
 		}
 		float cellSizeX = Mathf.Max(GRID_CELL_SIZE_X / currentColumns, MIN_GRID_SIZE_X);
 		float cellSizeY = Mathf.Max(GRID_CELL_SIZE_Y / currentRows, MIN_GRID_SIZE_Y);
