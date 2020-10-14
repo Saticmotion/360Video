@@ -5,10 +5,11 @@ using UnityEngine.UI;
 public class TabularDataPanelSphere : MonoBehaviour
 {
 	public Text title;
+	public Text pageNumber;
 	public string[] tabularData;
 	public RectTransform tabularDataWrapper;
 	public RectTransform tabularDataCellPrefab;
-	public RectTransform scrollPanel;
+	public RectTransform rowNumbers;
 	public Button backButton;
 	public Button nextButton;
 
@@ -19,7 +20,7 @@ public class TabularDataPanelSphere : MonoBehaviour
 
 	private const int MAXROWSPAGE = 7;
 	private const float MIN_GRID_SIZE_X = 50;
-	private const float MIN_GRID_SIZE_Y = 50;
+	private const float MIN_GRID_SIZE_Y = 52.5f;
 
 	public void Init(string newTitle, int rows, int columns, string[] newTabularData)
 	{
@@ -29,6 +30,7 @@ public class TabularDataPanelSphere : MonoBehaviour
 		ClearTable();
 
 		title.text = newTitle;
+		pageNumber.text = $"{ currentPage + 1 }";
 		tabularData = newTabularData;
 
 		if (newTabularData != null && newTabularData.Length > 0)
@@ -45,16 +47,15 @@ public class TabularDataPanelSphere : MonoBehaviour
 
 		SetButtonStates();
 		PopulateTable();
+		SetRowNumbers();
 
-		tabularDataWrapper.GetComponent<GridLayoutGroup2>().constraintCount = currentColumns;
-		float cellSizeX = Mathf.Max(scrollPanel.rect.width / currentColumns, MIN_GRID_SIZE_X);
-		float cellSizeY = Mathf.Max(scrollPanel.rect.height / currentRows, MIN_GRID_SIZE_Y);
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().constraintCount = currentColumns;
+		float cellSizeX = Mathf.Max(tabularDataWrapper.rect.width / currentColumns, MIN_GRID_SIZE_X);
+		float cellSizeY = Mathf.Max(tabularDataWrapper.rect.height / currentRows, MIN_GRID_SIZE_Y);
 
-		tabularDataWrapper.GetComponent<GridLayoutGroup2>().cellSize = new Vector2(cellSizeX, cellSizeY);
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = new Vector2(cellSizeX, cellSizeY);
 	}
-
-	//TODO(Jitse): Choose between destroying objects or pooling.
-	//TODO(cont.): Uncomment the parts from here on out to destroy objects (and then also delete the uncommented code.)
+	
 	private void PopulateTable()
 	{
 		for (int row = 0; row < currentRows; row++)
@@ -99,8 +100,10 @@ public class TabularDataPanelSphere : MonoBehaviour
 		ClearTable();
 
 		currentPage++;
+
 		SetButtonStates();
 		ActivateTableChildren();
+		SetRowNumbers();
 	}
 
 	private void BackButtonClick()
@@ -108,12 +111,16 @@ public class TabularDataPanelSphere : MonoBehaviour
 		ClearTable();
 
 		currentPage--;
+
 		SetButtonStates();
 		ActivateTableChildren();
-	}	
+		SetRowNumbers();
+	}
 
 	private void ActivateTableChildren()
 	{
+		pageNumber.text = $"{ currentPage + 1 }";
+
 		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
 		if (rowLimit > currentRows)
 		{
@@ -132,5 +139,34 @@ public class TabularDataPanelSphere : MonoBehaviour
 	{
 		backButton.interactable = currentPage > 0;
 		nextButton.interactable = currentPage < maxPages - 1;
+	}
+
+	private void SetRowNumbers()
+	{
+		//NOTE(Jitse): Calculate how many rows are in current page.
+		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
+		if (rowLimit > currentRows)
+		{
+			rowLimit = currentRows;
+		}
+		int rowsInPage = rowLimit - currentPage * MAXROWSPAGE;
+
+		for (int i = 0; i < MAXROWSPAGE; i++)
+		{
+			Text rowNumberText = rowNumbers.GetChild(i).GetComponent<Text>();
+			if (i < rowsInPage)
+			{
+				int rowNumber = currentPage * MAXROWSPAGE + i + 1;
+				rowNumberText.text = $"{rowNumber}";
+			}
+			else
+			{
+				rowNumberText.text = "";
+			}
+		}
+
+		//NOTE(Jitse): Also update padding to make sure elements start in upper left corner.
+		int bottomPadding = (MAXROWSPAGE - rowsInPage) * 50;
+		tabularDataWrapper.GetComponent<GridLayoutGroup>().padding.bottom = bottomPadding;
 	}
 }
