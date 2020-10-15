@@ -43,9 +43,12 @@ public class VideoPanel : MonoBehaviour
 
 		title.text = newTitle;
 
-		audioSlider.onValueChanged.AddListener(
-			delegate { AudioValueChanged(); }
+		if (audioSlider != null)
+		{
+			audioSlider.onValueChanged.AddListener(
+				delegate { AudioValueChanged(); }
 			);
+		}
 
 		//NOTE(Simon): Make sure we have added the events
 		controlButton.onClick.RemoveListener(TogglePlay);
