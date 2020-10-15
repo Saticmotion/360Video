@@ -17,6 +17,7 @@ public class VideoPanel : MonoBehaviour
 	public RawImage videoSurface;
 	public VideoPlayer videoPlayer;
 	public AudioSource audioSource;
+	public AudioSlider audioSlider;
 
 	public void Update()
 	{
@@ -41,6 +42,10 @@ public class VideoPanel : MonoBehaviour
 		videoPlayer.playOnAwake = false;
 
 		title.text = newTitle;
+
+		audioSlider.onValueChanged.AddListener(
+			delegate { AudioValueChanged(); }
+			);
 
 		//NOTE(Simon): Make sure we have added the events
 		controlButton.onClick.RemoveListener(TogglePlay);
@@ -97,5 +102,10 @@ public class VideoPanel : MonoBehaviour
 
 		controlButton.GetComponent<RawImage>().texture = videoPlayer.isPlaying ? iconPause : iconPlay;
 		bigButtonIcon.color = videoPlayer.isPlaying ? Color.clear : Color.white;
+	}
+
+	public void AudioValueChanged()
+	{
+		audioSource.volume = this.GetComponentInChildren<AudioSlider>().value;
 	}
 }
