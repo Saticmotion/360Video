@@ -38,8 +38,8 @@ public class AudioSlider : Slider
 	// Update is called once per frame
 	void Update()
     {
-		if (RectTransformUtility.RectangleContainsScreenPoint(image, Input.mousePosition) || 
-			RectTransformUtility.RectangleContainsScreenPoint(this.GetComponent<RectTransform>(), Input.mousePosition))
+		// || RectTransformUtility.RectangleContainsScreenPoint(this.GetComponent<RectTransform>(), Input.mousePosition)
+		if (RectTransformUtility.RectangleContainsScreenPoint(image, Input.mousePosition))
 		{
 			background.gameObject.SetActive(true);
 			fillArea.gameObject.SetActive(true);
@@ -47,7 +47,7 @@ public class AudioSlider : Slider
 		}
 		else
 		{
-			if (!isDragging)
+			if (!isDragging && !RectTransformUtility.RectangleContainsScreenPoint(this.GetComponent<RectTransform>(), Input.mousePosition))
 			{
 				background.gameObject.SetActive(false);
 				fillArea.gameObject.SetActive(false);

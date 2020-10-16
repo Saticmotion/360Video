@@ -180,6 +180,7 @@ public class Editor : MonoBehaviour
 
 	private List<Text> headerLabels = new List<Text>();
 	private VideoController videoController;
+	private AudioSlider audioSlider;
 	private FileLoader fileLoader;
 	private InteractionPointEditor pinnedHoverPoint;
 	private float timelineStartTime;
@@ -227,7 +228,6 @@ public class Editor : MonoBehaviour
 		interactionPointTemp = Instantiate(interactionPointPrefab);
 		interactionPointTemp.name = "Temp InteractionPoint";
 
-
 		interactionPoints = new List<InteractionPointEditor>();
 		sortedInteractionPoints = new List<InteractionPointEditor>();
 
@@ -246,6 +246,10 @@ public class Editor : MonoBehaviour
 		fileLoader = GameObject.Find("FileLoader").GetComponent<FileLoader>();
 		videoController = fileLoader.controller;
 		VideoControls.videoController = videoController;
+		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<AudioSlider>();
+		audioSlider.onValueChanged.AddListener(
+				delegate { AudioValueChanged(); }
+			);
 
 		//NOTE(Simon): Login if details were remembered
 		{
@@ -2719,5 +2723,10 @@ public class Editor : MonoBehaviour
 	private static long FileSize(string path)
 	{
 		return new FileInfo(path).Length;
+	}
+
+	private void AudioValueChanged()
+	{
+		videoController.audioSource.volume = audioSlider.value;
 	}
 }
