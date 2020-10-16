@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class AudioControl : MonoBehaviour
@@ -13,14 +15,20 @@ public class AudioControl : MonoBehaviour
 	public Texture iconPlay;
 	public Texture iconPause;
 
+	public AudioSlider audioSlider;
+	public RectTransform volumeImagesWrapper;
+	public Button lowerVolumeButton;
+	public Button increaseVolumeButton;
+
 	private AudioSource audioSource;
 	private AudioClip clip;
+	private Image[] volumeImages;
 
 	private string url;
 	private float fullClipLength;
 	private float currentClipTime;
 
-
+	// 70 & 185 left
 	void Awake()
 	{
 		audioSource = GetComponent<AudioSource>();
@@ -30,6 +38,19 @@ public class AudioControl : MonoBehaviour
 
 	public void Init(string url)
 	{
+		if (SceneManager.GetActiveScene().name == "Player")
+		{
+			volumeImages = volumeImagesWrapper.GetComponentsInChildren<Image>();
+			lowerVolumeButton.onClick.AddListener(LowerVolume);
+			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+		}
+		else if (SceneManager.GetActiveScene().name == "Editor")
+		{
+			audioSlider.onValueChanged.AddListener(
+				   delegate { AudioValueChanged(); }
+			   );
+		}
+
 		if (audioSource == null)
 		{
 			audioSource = GetComponent<AudioSource>();
@@ -116,5 +137,44 @@ public class AudioControl : MonoBehaviour
 		clipTimeText.text = $"{MathHelper.FormatSeconds(currentClipTime)} / {MathHelper.FormatSeconds(fullClipLength)}";
 		audioTimeSlider.maxValue = fullClipLength;
 		audioTimeSlider.value = currentClipTime;
+	}
+
+	public void LowerVolume()
+	{
+		if (audioSource.volume >= 0.1f)
+		{
+			audioSource.volume -= 0.1f;
+		}
+		else
+		{
+			audioSource.volume = 0f;
+		}
+
+		int index = Convert.ToInt32(audioSource.volume * 10);
+		var tempColor = volumeImages[index].color;
+		tempColor.a = 0f;
+		volumeImages[index].color = tempColor;
+	}
+
+	public void IncreaseVolume()
+	{
+		if (audioSource.volume < 1f)
+		{
+			int index = Convert.ToInt32(audioSource.volume * 10);
+			var tempColor = volumeImages[index].color;
+			tempColor.a = 1f;
+			volumeImages[index].color = tempColor;
+
+			audioSource.volume += 0.1f;
+		}
+		else
+		{
+			audioSource.volume = 1f;
+		}
+	}
+
+	public void AudioValueChanged()
+	{
+		audioSource.volume = this.GetComponentInChildren<AudioSlider>().value;
 	}
 }

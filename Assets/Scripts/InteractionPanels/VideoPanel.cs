@@ -140,13 +140,13 @@ public class VideoPanel : MonoBehaviour
 
 	public void IncreaseVolume()
 	{
-		int index = Convert.ToInt32(audioSource.volume * 10);
-		var tempColor = volumeImages[index].color;
-		tempColor.a = 1f;
-		volumeImages[index].color = tempColor;
-
-		if (audioSource.volume <= 0.9f)
+		if (audioSource.volume < 1f)
 		{
+			int index = Convert.ToInt32(audioSource.volume * 10);
+			var tempColor = volumeImages[index].color;
+			tempColor.a = 1f;
+			volumeImages[index].color = tempColor;
+
 			audioSource.volume += 0.1f;
 		}
 		else
