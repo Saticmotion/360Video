@@ -18,6 +18,11 @@ public class VideoPanel : MonoBehaviour
 	public VideoPlayer videoPlayer;
 	public AudioSource audioSource;
 	public AudioSlider audioSlider;
+	public RectTransform volumeImagesWrapper;
+	public Button lowerVolumeButton;
+	public Button increaseVolumeButton;
+
+	private Image[] volumeImages;
 
 	public void Update()
 	{
@@ -43,6 +48,15 @@ public class VideoPanel : MonoBehaviour
 
 		title.text = newTitle;
 
+		//NOTE(Jitse): Check if in Player
+		if (volumeImagesWrapper != null)
+		{
+			volumeImages = volumeImagesWrapper.GetComponentsInChildren<Image>();
+			lowerVolumeButton.onClick.AddListener(LowerVolume);
+			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+		}
+
+		//NOTE(Jitse): Check if in Editor
 		if (audioSlider != null)
 		{
 			audioSlider.onValueChanged.AddListener(
@@ -105,6 +119,40 @@ public class VideoPanel : MonoBehaviour
 
 		controlButton.GetComponent<RawImage>().texture = videoPlayer.isPlaying ? iconPause : iconPlay;
 		bigButtonIcon.color = videoPlayer.isPlaying ? Color.clear : Color.white;
+	}
+
+	public void LowerVolume()
+	{
+		if (audioSource.volume >= 0.1f)
+		{
+			audioSource.volume -= 0.1f;
+		}
+		else
+		{
+			audioSource.volume = 0f;
+		}
+
+		int index = Convert.ToInt32(audioSource.volume * 10);
+		var tempColor = volumeImages[index].color;
+		tempColor.a = 0f;
+		volumeImages[index].color = tempColor;
+	}
+
+	public void IncreaseVolume()
+	{
+		int index = Convert.ToInt32(audioSource.volume * 10);
+		var tempColor = volumeImages[index].color;
+		tempColor.a = 1f;
+		volumeImages[index].color = tempColor;
+
+		if (audioSource.volume <= 0.9f)
+		{
+			audioSource.volume += 0.1f;
+		}
+		else
+		{ 
+			audioSource.volume = 1f;
+		}
 	}
 
 	public void AudioValueChanged()

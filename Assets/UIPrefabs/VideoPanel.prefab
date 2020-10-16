@@ -63,6 +63,9 @@ MonoBehaviour:
   videoPlayer: {fileID: 328974316446840502}
   audioSource: {fileID: 0}
   audioSlider: {fileID: 8828041253840151765}
+  volumeImagesWrapper: {fileID: 0}
+  lowerVolumeButton: {fileID: 0}
+  increaseVolumeButton: {fileID: 0}
 --- !u!222 &222205240750771376
 CanvasRenderer:
   m_ObjectHideFlags: 0
