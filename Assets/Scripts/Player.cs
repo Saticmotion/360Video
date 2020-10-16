@@ -65,7 +65,12 @@ public class Player : MonoBehaviour
 	private FileLoader fileLoader;
 	private VideoController videoController;
 	private List<GameObject> videoList;
-	
+
+	private RectTransform volumeImagesWrapper;
+	private Button lowerVolumeButton;
+	private Button increaseVolumeButton;
+	private Image[] volumeImages;
+
 	private GameObject indexPanel;
 	private Transform videoCanvas;
 	private GameObject projector;
@@ -110,6 +115,14 @@ public class Player : MonoBehaviour
 		videoController = fileLoader.controller;
 		videoController.OnSeek += OnSeek;
 		VideoControls.videoController = videoController;
+
+		volumeImagesWrapper = GameObject.Find("VolumeImages").GetComponent<RectTransform>();
+		lowerVolumeButton = GameObject.Find("LowerVolume").GetComponent<Button>();
+		increaseVolumeButton = GameObject.Find("IncreaseVolume").GetComponent<Button>();
+		volumeImages = volumeImagesWrapper.GetComponentsInChildren<Image>();
+		lowerVolumeButton.onClick.AddListener(LowerVolume);
+		increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+
 		OpenFilePanel();
 
 		mainEventSystem = EventSystem.current;
@@ -783,6 +796,40 @@ public class Player : MonoBehaviour
 		else
 		{
 			mandatoryPauseMessage.SetActive(false);
+		}
+	}
+
+	public void LowerVolume()
+	{
+		if (videoController.audioSource.volume >= 0.1f)
+		{
+			videoController.audioSource.volume -= 0.1f;
+		}
+		else
+		{
+			videoController.audioSource.volume = 0f;
+		}
+
+		int index = Convert.ToInt32(videoController.audioSource.volume * 10);
+		var tempColor = volumeImages[index].color;
+		tempColor.a = 0f;
+		volumeImages[index].color = tempColor;
+	}
+
+	public void IncreaseVolume()
+	{
+		if (videoController.audioSource.volume < 1f)
+		{
+			int index = Convert.ToInt32(videoController.audioSource.volume * 10);
+			var tempColor = volumeImages[index].color;
+			tempColor.a = 1f;
+			volumeImages[index].color = tempColor;
+
+			videoController.audioSource.volume += 0.1f;
+		}
+		else
+		{
+			videoController.audioSource.volume = 1f;
 		}
 	}
 
