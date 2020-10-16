@@ -28,7 +28,6 @@ public class AudioControl : MonoBehaviour
 	private float fullClipLength;
 	private float currentClipTime;
 
-	// 70 & 185 left
 	void Awake()
 	{
 		audioSource = GetComponent<AudioSource>();
@@ -49,6 +48,7 @@ public class AudioControl : MonoBehaviour
 			audioSlider.onValueChanged.AddListener(
 				   delegate { AudioValueChanged(); }
 			   );
+			audioSource.volume = audioSlider.value;
 		}
 
 		if (audioSource == null)

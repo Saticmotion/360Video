@@ -62,6 +62,7 @@ public class VideoPanel : MonoBehaviour
 			audioSlider.onValueChanged.AddListener(
 				delegate { AudioValueChanged(); }
 			);
+			audioSource.volume = audioSlider.value;
 		}
 
 		//NOTE(Simon): Make sure we have added the events
@@ -157,6 +158,6 @@ public class VideoPanel : MonoBehaviour
 
 	public void AudioValueChanged()
 	{
-		audioSource.volume = this.GetComponentInChildren<AudioSlider>().value;
+		audioSource.volume = audioSlider.value;
 	}
 }
