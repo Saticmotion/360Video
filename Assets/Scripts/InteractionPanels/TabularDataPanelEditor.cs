@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class TabularDataPanelEditor : MonoBehaviour
 {
 	public InputField title;
+	public ScrollRect scrollRect;
 	public RectTransform tabularDataWrapper;
 	public RectTransform tabularDataCellPrefab;
 	public RectTransform rowNumbersWrapper;
@@ -90,12 +91,17 @@ public class TabularDataPanelEditor : MonoBehaviour
 		}
 
 		rowNumbersWrapper.GetChild(answerRows).gameObject.SetActive(true);
-
+		
 		answerRows++;
 
 		SetButtonStates();
 
 		tabularDataWrapper.GetComponent<GridLayoutGroup>().cellSize = EnsureMinSize(answerColumns, answerRows);
+
+		//NOTE(Jitse): Force canvases to update before setting the verticalNormalizedPosition of ScrollRect to 0.
+		//NOTE(cont.): If this is not done, ScrollRect will scroll down before adding the new row, thus not completely scrolling down.
+		Canvas.ForceUpdateCanvases();
+		scrollRect.verticalNormalizedPosition = 0;
 	}
 
 	public void RemoveRow()
