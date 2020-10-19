@@ -166,9 +166,5 @@ public class TabularDataPanelSphere : MonoBehaviour
 				rowNumberText.text = "";
 			}
 		}
-
-		//NOTE(Jitse): Also update padding to make sure elements start in upper left corner.
-		int bottomPadding = (MAXROWSPAGE - rowsInPage) * 50;
-		tabularDataWrapper.GetComponent<GridLayoutGroup>().padding.bottom = bottomPadding;
 	}
 }
