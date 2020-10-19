@@ -83,6 +83,7 @@ public class TabularDataPanelEditor : MonoBehaviour
 	}
 	public void AddRow()
 	{
+		//NOTE(Jitse): Enable all cells in this row
 		for (int i = answerRows * MAXCOLUMNS; i < answerRows * MAXCOLUMNS + answerColumns; i++)
 		{
 			tabularDataWrapper.GetChild(i).gameObject.SetActive(true);
@@ -101,6 +102,7 @@ public class TabularDataPanelEditor : MonoBehaviour
 	{
 		answerRows--;
 
+		//NOTE(Jitse): Disable all cells in this row
 		for (int i = answerRows * MAXCOLUMNS; i < answerRows * MAXCOLUMNS + answerColumns; i++)
 		{
 			tabularDataWrapper.GetChild(i).gameObject.SetActive(false);

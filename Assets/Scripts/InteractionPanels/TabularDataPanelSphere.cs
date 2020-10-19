@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class TabularDataPanelSphere : MonoBehaviour
@@ -67,6 +66,7 @@ public class TabularDataPanelSphere : MonoBehaviour
 				{
 					dataCell.gameObject.SetActive(false);
 				}
+
 				var cellText = dataCell.transform.GetComponentInChildren<InputField>();
 				cellText.interactable = false;
 
@@ -81,11 +81,12 @@ public class TabularDataPanelSphere : MonoBehaviour
 
 	private void ClearTable()
 	{
-		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
+		int rowLimit = (currentPage + 1) * MAXROWSPAGE;
 		if (rowLimit > currentRows)
 		{
 			rowLimit = currentRows;
 		}
+
 		for (int row = currentPage * MAXROWSPAGE; row < rowLimit; row++)
 		{
 			for (int column = 0; column < currentColumns; column++)
@@ -121,7 +122,7 @@ public class TabularDataPanelSphere : MonoBehaviour
 	{
 		pageNumber.text = $"{ currentPage + 1 }";
 
-		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
+		int rowLimit = (currentPage + 1) * MAXROWSPAGE;
 		if (rowLimit > currentRows)
 		{
 			rowLimit = currentRows;
@@ -144,16 +145,17 @@ public class TabularDataPanelSphere : MonoBehaviour
 	private void SetRowNumbers()
 	{
 		//NOTE(Jitse): Calculate how many rows are in current page.
-		int rowLimit = currentPage * MAXROWSPAGE + MAXROWSPAGE;
+		int rowLimit = (currentPage + 1) * MAXROWSPAGE;
 		if (rowLimit > currentRows)
 		{
 			rowLimit = currentRows;
 		}
+
 		int rowsInPage = rowLimit - currentPage * MAXROWSPAGE;
 
 		for (int i = 0; i < MAXROWSPAGE; i++)
 		{
-			Text rowNumberText = rowNumbers.GetChild(i).GetComponent<Text>();
+			var rowNumberText = rowNumbers.GetChild(i).GetComponent<Text>();
 			if (i < rowsInPage)
 			{
 				int rowNumber = currentPage * MAXROWSPAGE + i + 1;
