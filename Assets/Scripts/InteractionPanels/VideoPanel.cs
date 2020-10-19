@@ -17,7 +17,7 @@ public class VideoPanel : MonoBehaviour
 	public RawImage videoSurface;
 	public VideoPlayer videoPlayer;
 	public AudioSource audioSource;
-	public AudioSlider audioSlider;
+	public Slider audioSlider;
 	public RectTransform volumeImagesWrapper;
 	public Button lowerVolumeButton;
 	public Button increaseVolumeButton;

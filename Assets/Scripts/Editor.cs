@@ -180,7 +180,7 @@ public class Editor : MonoBehaviour
 
 	private List<Text> headerLabels = new List<Text>();
 	private VideoController videoController;
-	private AudioSlider audioSlider;
+	private Slider audioSlider;
 	private FileLoader fileLoader;
 	private InteractionPointEditor pinnedHoverPoint;
 	private float timelineStartTime;
@@ -246,7 +246,7 @@ public class Editor : MonoBehaviour
 		fileLoader = GameObject.Find("FileLoader").GetComponent<FileLoader>();
 		videoController = fileLoader.controller;
 		VideoControls.videoController = videoController;
-		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<AudioSlider>();
+		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
 		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
 		
 		//NOTE(Simon): Login if details were remembered

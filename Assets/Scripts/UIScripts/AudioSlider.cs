@@ -2,83 +2,80 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class AudioSlider : Slider
+public class AudioSlider : MonoBehaviour
 {
-	private RectTransform background;
-	private RectTransform fillArea;
-	private RectTransform handle;
-	private RectTransform icon;
+	public Button increaseVolumeButton;
+	public Button decreaseVolumeButton;
+	public RectTransform background;
+	public RectTransform icon;
+	public Slider slider;
 
 	private bool muted;
 	private bool isDragging;
 	private float oldAudioValue;
 
-	new void Start()
+	void Start()
 	{
-		var components = GetComponentsInChildren<RectTransform>(true);
-		background = components[1];
-		fillArea = components[2];
-		handle = components[4];
-
-		var parent = GetComponentsInParent<RectTransform>()[1];
-		icon = parent.gameObject.GetComponentsInChildren<RectTransform>()[1];
-
 		muted = false;
 		isDragging = false;
 
+		slider.OnDrag(OnDrag());
+		slider.OnPointerDown(OnPointerDown());
+		slider.OnPointerUp(OnPointerUp());
+
+		slider.handleRect.gameObject.SetActive(false);
+		slider.fillRect.gameObject.SetActive(false);
 		background.gameObject.SetActive(false);
-		fillArea.gameObject.SetActive(false);
-		handle.gameObject.SetActive(false);
 	}
 
-	new void Update()
+	void Update()
 	{
 		if (RectTransformUtility.RectangleContainsScreenPoint(icon, Input.mousePosition))
 		{
 			background.gameObject.SetActive(true);
-			fillArea.gameObject.SetActive(true);
-			handle.gameObject.SetActive(true);
+			slider.handleRect.gameObject.SetActive(true);
+			slider.fillRect.gameObject.SetActive(true);
 		}
 		else
 		{
-			if (!isDragging && !RectTransformUtility.RectangleContainsScreenPoint(GetComponent<RectTransform>(), Input.mousePosition))
+			if (!isDragging && !RectTransformUtility.RectangleContainsScreenPoint(slider.GetComponent<RectTransform>(), Input.mousePosition))
 			{
 				background.gameObject.SetActive(false);
-				fillArea.gameObject.SetActive(false);
-				handle.gameObject.SetActive(false);
+				slider.handleRect.gameObject.SetActive(false);
+				slider.fillRect.gameObject.SetActive(false);
 			}
 		}
 	}
 
-	public override void OnDrag(PointerEventData eventData)
+	public PointerEventData OnDrag()
 	{
-		base.OnDrag(eventData);
 		isDragging = true;
 		muted = false;
+		return null;
 	}
 
-	public override void OnPointerDown(PointerEventData eventData)
+	public PointerEventData OnPointerDown()
 	{
-		base.OnPointerDown(eventData);
 		muted = false;
+		return null;
 	}
 
-	public override void OnPointerUp(PointerEventData eventData)
+	public PointerEventData OnPointerUp()
 	{
-		base.OnPointerUp(eventData);
 		isDragging = false;
+		return null;
 	}
 
 	public void Mute()
 	{
 		if (muted)
 		{
-			value = oldAudioValue;
+			slider.value = oldAudioValue;
 		}
 		else
 		{
-			oldAudioValue = value;
-			value = 0;
+			oldAudioValue = slider.value;
+			slider.value = 0;
 		}
 
 		muted = !muted;

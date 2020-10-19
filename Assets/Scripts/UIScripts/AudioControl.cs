@@ -15,7 +15,7 @@ public class AudioControl : MonoBehaviour
 	public Texture iconPlay;
 	public Texture iconPause;
 
-	public AudioSlider audioSlider;
+	public Slider audioSlider;
 	public RectTransform volumeImagesWrapper;
 	public Button lowerVolumeButton;
 	public Button increaseVolumeButton;
@@ -174,6 +174,6 @@ public class AudioControl : MonoBehaviour
 
 	public void AudioValueChanged()
 	{
-		audioSource.volume = GetComponentInChildren<AudioSlider>().value;
+		audioSource.volume = GetComponentInChildren<Slider>().value;
 	}
 }
