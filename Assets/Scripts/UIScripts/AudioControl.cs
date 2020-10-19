@@ -45,9 +45,7 @@ public class AudioControl : MonoBehaviour
 		}
 		else if (SceneManager.GetActiveScene().name == "Editor")
 		{
-			audioSlider.onValueChanged.AddListener(
-				   delegate { AudioValueChanged(); }
-			   );
+			audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
 			audioSource.volume = audioSlider.value;
 		}
 
@@ -55,6 +53,7 @@ public class AudioControl : MonoBehaviour
 		{
 			audioSource = GetComponent<AudioSource>();
 		}
+
 		audioSource.Stop();
 		clip = null;
 		this.url = url;
@@ -175,6 +174,6 @@ public class AudioControl : MonoBehaviour
 
 	public void AudioValueChanged()
 	{
-		audioSource.volume = this.GetComponentInChildren<AudioSlider>().value;
+		audioSource.volume = GetComponentInChildren<AudioSlider>().value;
 	}
 }

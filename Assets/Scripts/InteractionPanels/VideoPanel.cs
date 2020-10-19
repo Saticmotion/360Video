@@ -35,12 +35,14 @@ public class VideoPanel : MonoBehaviour
 
 	public void Init(string newTitle, string fullPath)
 	{
-		audioSource = videoPlayer.gameObject.AddComponent<AudioSource>();
-		audioSource.playOnAwake = false;
-
+		videoPlayer.source = VideoSource.Url;
 		videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
 		videoPlayer.controlledAudioTrackCount = 1;
 		videoPlayer.EnableAudioTrack(0, true);
+
+		audioSource = videoPlayer.gameObject.GetOrAddComponent<AudioSource>();
+		audioSource.playOnAwake = false;
+
 		videoPlayer.SetTargetAudioSource(0, audioSource);
 
 		videoPlayer.url = fullPath;
@@ -54,15 +56,14 @@ public class VideoPanel : MonoBehaviour
 			volumeImages = volumeImagesWrapper.GetComponentsInChildren<Image>();
 			lowerVolumeButton.onClick.AddListener(LowerVolume);
 			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+			//TODO(Jitse): Read value from file
 		}
 
 		//NOTE(Jitse): Check if in Editor
 		if (audioSlider != null)
 		{
-			audioSlider.onValueChanged.AddListener(
-				delegate { AudioValueChanged(); }
-			);
-			audioSource.volume = audioSlider.value;
+			audioSlider.onValueChanged.AddListener( _ => AudioValueChanged());
+			//TODO(Jitse): Read value from file
 		}
 
 		//NOTE(Simon): Make sure we have added the events

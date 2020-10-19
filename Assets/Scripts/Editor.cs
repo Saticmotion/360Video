@@ -247,10 +247,8 @@ public class Editor : MonoBehaviour
 		videoController = fileLoader.controller;
 		VideoControls.videoController = videoController;
 		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<AudioSlider>();
-		audioSlider.onValueChanged.AddListener(
-				delegate { AudioValueChanged(); }
-			);
-
+		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
+		
 		//NOTE(Simon): Login if details were remembered
 		{
 			var details = LoginPanel.GetSavedLogin();

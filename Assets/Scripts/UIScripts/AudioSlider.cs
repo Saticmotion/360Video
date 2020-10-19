@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -10,22 +7,21 @@ public class AudioSlider : Slider
 	private RectTransform background;
 	private RectTransform fillArea;
 	private RectTransform handle;
-	private RectTransform image;
+	private RectTransform icon;
 
 	private bool muted;
 	private bool isDragging;
 	private float oldAudioValue;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-		var components = this.GetComponentsInChildren<RectTransform>(true);
+	new void Start()
+	{
+		var components = GetComponentsInChildren<RectTransform>(true);
 		background = components[1];
 		fillArea = components[2];
 		handle = components[4];
 
 		var parent = GetComponentsInParent<RectTransform>()[1];
-		image = parent.gameObject.GetComponentsInChildren<RectTransform>()[1];
+		icon = parent.gameObject.GetComponentsInChildren<RectTransform>()[1];
 
 		muted = false;
 		isDragging = false;
@@ -35,11 +31,9 @@ public class AudioSlider : Slider
 		handle.gameObject.SetActive(false);
 	}
 
-	// Update is called once per frame
-	void Update()
-    {
-		// || RectTransformUtility.RectangleContainsScreenPoint(this.GetComponent<RectTransform>(), Input.mousePosition)
-		if (RectTransformUtility.RectangleContainsScreenPoint(image, Input.mousePosition))
+	new void Update()
+	{
+		if (RectTransformUtility.RectangleContainsScreenPoint(icon, Input.mousePosition))
 		{
 			background.gameObject.SetActive(true);
 			fillArea.gameObject.SetActive(true);
@@ -47,7 +41,7 @@ public class AudioSlider : Slider
 		}
 		else
 		{
-			if (!isDragging && !RectTransformUtility.RectangleContainsScreenPoint(this.GetComponent<RectTransform>(), Input.mousePosition))
+			if (!isDragging && !RectTransformUtility.RectangleContainsScreenPoint(GetComponent<RectTransform>(), Input.mousePosition))
 			{
 				background.gameObject.SetActive(false);
 				fillArea.gameObject.SetActive(false);
@@ -63,6 +57,12 @@ public class AudioSlider : Slider
 		muted = false;
 	}
 
+	public override void OnPointerDown(PointerEventData eventData)
+	{
+		base.OnPointerDown(eventData);
+		muted = false;
+	}
+
 	public override void OnPointerUp(PointerEventData eventData)
 	{
 		base.OnPointerUp(eventData);
@@ -73,12 +73,12 @@ public class AudioSlider : Slider
 	{
 		if (muted)
 		{
-			this.value = oldAudioValue;
+			value = oldAudioValue;
 		}
 		else
 		{
-			oldAudioValue = this.value;
-			this.value = 0;
+			oldAudioValue = value;
+			value = 0;
 		}
 
 		muted = !muted;

@@ -810,7 +810,7 @@ public class Player : MonoBehaviour
 			videoController.audioSource.volume = 0f;
 		}
 
-		int index = Convert.ToInt32(videoController.audioSource.volume * 10);
+		int index = (int)(videoController.audioSource.volume * 10);
 		var tempColor = volumeImages[index].color;
 		tempColor.a = 0f;
 		volumeImages[index].color = tempColor;
@@ -820,7 +820,7 @@ public class Player : MonoBehaviour
 	{
 		if (videoController.audioSource.volume < 1f)
 		{
-			int index = Convert.ToInt32(videoController.audioSource.volume * 10);
+			int index = (int)(videoController.audioSource.volume * 10);
 			var tempColor = volumeImages[index].color;
 			tempColor.a = 1f;
 			volumeImages[index].color = tempColor;
