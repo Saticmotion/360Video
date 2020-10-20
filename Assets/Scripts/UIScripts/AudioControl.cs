@@ -2,7 +2,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class AudioControl : MonoBehaviour
@@ -16,7 +15,6 @@ public class AudioControl : MonoBehaviour
 	public Texture iconPause;
 
 	public Slider audioSlider;
-	public RectTransform volumeImagesWrapper;
 	public Button lowerVolumeButton;
 	public Button increaseVolumeButton;
 
@@ -37,18 +35,6 @@ public class AudioControl : MonoBehaviour
 
 	public void Init(string url)
 	{
-		if (SceneManager.GetActiveScene().name == "Player")
-		{
-			volumeImages = volumeImagesWrapper.GetComponentsInChildren<Image>();
-			lowerVolumeButton.onClick.AddListener(LowerVolume);
-			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
-		}
-		else if (SceneManager.GetActiveScene().name == "Editor")
-		{
-			audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
-			audioSource.volume = audioSlider.value;
-		}
-
 		if (audioSource == null)
 		{
 			audioSource = GetComponent<AudioSource>();
@@ -58,6 +44,17 @@ public class AudioControl : MonoBehaviour
 		clip = null;
 		this.url = url;
 		StartCoroutine(GetAudioClip(url));
+
+		if (lowerVolumeButton != null)
+		{
+			lowerVolumeButton.onClick.AddListener(LowerVolume);
+			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+		}
+		if (audioSlider != null)
+		{
+			audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
+			audioSource.volume = audioSlider.value;
+		}
 	}
 
 	void Update()
@@ -174,6 +171,6 @@ public class AudioControl : MonoBehaviour
 
 	public void AudioValueChanged()
 	{
-		audioSource.volume = GetComponentInChildren<Slider>().value;
+		audioSource.volume = audioSlider.value;
 	}
 }

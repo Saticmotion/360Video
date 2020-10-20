@@ -18,11 +18,8 @@ public class VideoPanel : MonoBehaviour
 	public VideoPlayer videoPlayer;
 	public AudioSource audioSource;
 	public Slider audioSlider;
-	public RectTransform volumeImagesWrapper;
 	public Button lowerVolumeButton;
 	public Button increaseVolumeButton;
-
-	private Image[] volumeImages;
 
 	public void Update()
 	{
@@ -51,9 +48,8 @@ public class VideoPanel : MonoBehaviour
 		title.text = newTitle;
 
 		//NOTE(Jitse): Check if in Player
-		if (volumeImagesWrapper != null)
+		if (lowerVolumeButton != null)
 		{
-			volumeImages = volumeImagesWrapper.GetComponentsInChildren<Image>();
 			lowerVolumeButton.onClick.AddListener(LowerVolume);
 			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
 			//TODO(Jitse): Read value from file
@@ -134,27 +130,21 @@ public class VideoPanel : MonoBehaviour
 			audioSource.volume = 0f;
 		}
 
-		int index = Convert.ToInt32(audioSource.volume * 10);
-		var tempColor = volumeImages[index].color;
-		tempColor.a = 0f;
-		volumeImages[index].color = tempColor;
+		audioSlider.value = audioSource.volume;
 	}
 
 	public void IncreaseVolume()
 	{
 		if (audioSource.volume < 1f)
 		{
-			int index = Convert.ToInt32(audioSource.volume * 10);
-			var tempColor = volumeImages[index].color;
-			tempColor.a = 1f;
-			volumeImages[index].color = tempColor;
-
 			audioSource.volume += 0.1f;
 		}
 		else
 		{ 
 			audioSource.volume = 1f;
 		}
+
+		audioSlider.value = audioSource.volume;
 	}
 
 	public void AudioValueChanged()

@@ -66,10 +66,10 @@ public class Player : MonoBehaviour
 	private VideoController videoController;
 	private List<GameObject> videoList;
 
-	private RectTransform volumeImagesWrapper;
-	private Button lowerVolumeButton;
-	private Button increaseVolumeButton;
-	private Image[] volumeImages;
+	private Hittable lowerVolumeButton;
+	private Hittable increaseVolumeButton;
+	private Slider audioSlider;
+	private Slider audioSliderVR;
 
 	private GameObject indexPanel;
 	private Transform videoCanvas;
@@ -116,12 +116,15 @@ public class Player : MonoBehaviour
 		videoController.OnSeek += OnSeek;
 		VideoControls.videoController = videoController;
 
-		volumeImagesWrapper = GameObject.Find("VolumeImages").GetComponent<RectTransform>();
-		lowerVolumeButton = GameObject.Find("LowerVolume").GetComponent<Button>();
-		increaseVolumeButton = GameObject.Find("IncreaseVolume").GetComponent<Button>();
-		volumeImages = volumeImagesWrapper.GetComponentsInChildren<Image>();
-		lowerVolumeButton.onClick.AddListener(LowerVolume);
-		increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
+		audioSliderVR = GameObject.Find("VolumeControlVR").GetComponentInChildren<Slider>();
+		lowerVolumeButton = GameObject.Find("LowerVolume").GetComponent<Hittable>();
+		increaseVolumeButton = GameObject.Find("IncreaseVolume").GetComponent<Hittable>();
+
+		audioSliderVR.interactable = false;
+		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
+		lowerVolumeButton.onHit.AddListener(LowerVolume);
+		increaseVolumeButton.onHit.AddListener(IncreaseVolume);
 
 		OpenFilePanel();
 
@@ -810,27 +813,25 @@ public class Player : MonoBehaviour
 			videoController.audioSource.volume = 0f;
 		}
 
-		int index = (int)(videoController.audioSource.volume * 10);
-		var tempColor = volumeImages[index].color;
-		tempColor.a = 0f;
-		volumeImages[index].color = tempColor;
+		audioSliderVR.value = videoController.audioSource.volume;
 	}
 
 	public void IncreaseVolume()
 	{
 		if (videoController.audioSource.volume < 1f)
 		{
-			int index = (int)(videoController.audioSource.volume * 10);
-			var tempColor = volumeImages[index].color;
-			tempColor.a = 1f;
-			volumeImages[index].color = tempColor;
-
 			videoController.audioSource.volume += 0.1f;
 		}
 		else
 		{
 			videoController.audioSource.volume = 1f;
 		}
+
+		audioSliderVR.value = videoController.audioSource.volume;
+	}
+	public void AudioValueChanged()
+	{
+		videoController.audioSource.volume = audioSlider.value;
 	}
 
 	public Controller[] GetControllers()

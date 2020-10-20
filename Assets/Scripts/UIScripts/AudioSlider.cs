@@ -1,83 +1,128 @@
-﻿using UnityEngine;
-using UnityEngine.EventSystems;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class AudioSlider : MonoBehaviour
 {
+	public Button lowerVolumeButton;
 	public Button increaseVolumeButton;
-	public Button decreaseVolumeButton;
 	public RectTransform background;
-	public RectTransform icon;
 	public Slider slider;
+	public Image icon;
+	public Sprite iconMuted;
+	public Sprite iconDefault;
 
 	private bool muted;
+	private bool buttonPressed;
 	private bool isDragging;
 	private float oldAudioValue;
+	private IEnumerator coroutine;
 
 	void Start()
 	{
 		muted = false;
 		isDragging = false;
 
-		slider.OnDrag(OnDrag());
-		slider.OnPointerDown(OnPointerDown());
-		slider.OnPointerUp(OnPointerUp());
-
 		slider.handleRect.gameObject.SetActive(false);
 		slider.fillRect.gameObject.SetActive(false);
 		background.gameObject.SetActive(false);
+
+		lowerVolumeButton.onClick.AddListener(LowerVolume);
+		increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+
+		coroutine = ShowSlider(2f);
 	}
 
 	void Update()
 	{
-		if (RectTransformUtility.RectangleContainsScreenPoint(icon, Input.mousePosition))
+		if (RectTransformUtility.RectangleContainsScreenPoint(icon.GetComponent<RectTransform>(), Input.mousePosition))
 		{
 			background.gameObject.SetActive(true);
-			slider.handleRect.gameObject.SetActive(true);
 			slider.fillRect.gameObject.SetActive(true);
 		}
 		else
 		{
-			if (!isDragging && !RectTransformUtility.RectangleContainsScreenPoint(slider.GetComponent<RectTransform>(), Input.mousePosition))
+			if (!isDragging && !RectTransformUtility.RectangleContainsScreenPoint(slider.GetComponent<RectTransform>(), Input.mousePosition)
+				&& !buttonPressed)
 			{
 				background.gameObject.SetActive(false);
-				slider.handleRect.gameObject.SetActive(false);
 				slider.fillRect.gameObject.SetActive(false);
 			}
 		}
 	}
 
-	public PointerEventData OnDrag()
+	public void OnDragSlider()
 	{
 		isDragging = true;
 		muted = false;
-		return null;
 	}
 
-	public PointerEventData OnPointerDown()
+	public void OnPointerDownSlider()
 	{
-		muted = false;
-		return null;
+		oldAudioValue = -1f;
+		if (muted)
+		{
+			Mute();
+		}
 	}
 
-	public PointerEventData OnPointerUp()
+	public void OnPointerUpSlider()
 	{
 		isDragging = false;
-		return null;
 	}
 
 	public void Mute()
 	{
 		if (muted)
 		{
-			slider.value = oldAudioValue;
+			if (oldAudioValue != -1f)
+			{
+				slider.value = oldAudioValue;
+			}
+			icon.sprite = iconDefault;
 		}
 		else
 		{
 			oldAudioValue = slider.value;
 			slider.value = 0;
+			icon.sprite = iconMuted;
 		}
 
 		muted = !muted;
+	}
+
+	private void LowerVolume()
+	{
+		if (muted)
+		{
+			Mute();
+		}
+		
+		StopCoroutine(coroutine);
+		coroutine = ShowSlider(2f);
+		StartCoroutine(coroutine);
+	}
+	private void IncreaseVolume()
+	{
+		if (muted)
+		{
+			Mute();
+		}
+
+		StopCoroutine(coroutine);
+		coroutine = ShowSlider(2f);
+		StartCoroutine(coroutine);
+	}
+
+	private IEnumerator ShowSlider(float delay)
+	{
+		background.gameObject.SetActive(true);
+		slider.fillRect.gameObject.SetActive(true);
+
+		buttonPressed = true;
+
+		yield return new WaitForSeconds(delay);
+
+		buttonPressed = false;
 	}
 }

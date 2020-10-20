@@ -657,8 +657,7 @@ MonoBehaviour:
   clipTimeText: {fileID: 114889920858865514}
   iconPlay: {fileID: 2800000, guid: 33656b95c6241cb4686736a803d137bb, type: 3}
   iconPause: {fileID: 2800000, guid: 774f22a79df44f448a8a813691361142, type: 3}
-  audioSlider: {fileID: 3859617868522750507}
-  volumeImagesWrapper: {fileID: 0}
+  audioSlider: {fileID: 5943158707138868540}
   lowerVolumeButton: {fileID: 0}
   increaseVolumeButton: {fileID: 0}
 --- !u!82 &82909644079908390
@@ -1375,6 +1374,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 224883819053607358}
     m_Modifications:
+    - target: {fileID: 898361331359012108, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 898361331359012108, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2362536843972441144, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1493,15 +1502,15 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 4216285616448438302}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3859617868522750507 stripped
+--- !u!114 &5943158707138868540 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1086316858794246709, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
+  m_CorrespondingSourceObject: {fileID: 7564101474510681378, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
     type: 3}
   m_PrefabInstance: {fileID: 4216285616448438302}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9532db58247ddcd46b28d87c0ca44b9e, type: 3}
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
