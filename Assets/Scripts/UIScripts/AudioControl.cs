@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
@@ -18,9 +19,10 @@ public class AudioControl : MonoBehaviour
 	public Button lowerVolumeButton;
 	public Button increaseVolumeButton;
 
+	public AudioMixer mixer;
+
 	private AudioSource audioSource;
 	private AudioClip clip;
-	private Image[] volumeImages;
 
 	private string url;
 	private float fullClipLength;
@@ -137,40 +139,22 @@ public class AudioControl : MonoBehaviour
 
 	public void LowerVolume()
 	{
-		if (audioSource.volume >= 0.1f)
-		{
-			audioSource.volume -= 0.1f;
-		}
-		else
-		{
-			audioSource.volume = 0f;
-		}
-
-		int index = Convert.ToInt32(audioSource.volume * 10);
-		var tempColor = volumeImages[index].color;
-		tempColor.a = 0f;
-		volumeImages[index].color = tempColor;
+		audioSlider.value -= 0.1f;
 	}
 
 	public void IncreaseVolume()
 	{
-		if (audioSource.volume < 1f)
-		{
-			int index = Convert.ToInt32(audioSource.volume * 10);
-			var tempColor = volumeImages[index].color;
-			tempColor.a = 1f;
-			volumeImages[index].color = tempColor;
-
-			audioSource.volume += 0.1f;
-		}
-		else
-		{
-			audioSource.volume = 1f;
-		}
+		audioSlider.value += 0.1f;
 	}
 
 	public void AudioValueChanged()
 	{
-		audioSource.volume = audioSlider.value;
+		mixer.SetFloat("AudioVolumePanel", CorrectVolume(audioSlider.value));
+	}
+
+	private float CorrectVolume(float value)
+	{
+		float temp = Mathf.Log10(value) * 20;
+		return temp;
 	}
 }

@@ -156,7 +156,7 @@ MonoBehaviour:
   m_FillRect: {fileID: 898361331359012108}
   m_HandleRect: {fileID: 4447290697689029927}
   m_Direction: 2
-  m_MinValue: 0
+  m_MinValue: 0.0001
   m_MaxValue: 1
   m_WholeNumbers: 0
   m_Value: 1
@@ -617,8 +617,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9532db58247ddcd46b28d87c0ca44b9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lowerVolumeButton: {fileID: 0}
   increaseVolumeButton: {fileID: 0}
-  decreaseVolumeButton: {fileID: 0}
   background: {fileID: 5478013718549750387}
   slider: {fileID: 7564101474510681378}
   icon: {fileID: 6692626112250678847}
