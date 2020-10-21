@@ -99,6 +99,10 @@ public class VideoPanel : MonoBehaviour
 		controlButton.onClick.AddListener(TogglePlay);
 		bigButton.onClick.RemoveListener(TogglePlay);
 		bigButton.onClick.AddListener(TogglePlay);
+
+		//NOTE(Jitse): Update slider value
+		LoadVolume();
+		audioSlider.value = savedAudioVolumePanel;
 	}
 
 	public void OnSeek(float value)

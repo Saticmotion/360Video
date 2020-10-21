@@ -71,6 +71,13 @@ public class AudioControl : MonoBehaviour
 		ShowAudioPlayTime();
 	}
 
+	private void OnEnable()
+	{
+		//NOTE(Jitse): Update slider value
+		LoadVolume();
+		audioSlider.value = savedAudioVolumePanel;
+	}
+
 	public void TogglePlay()
 	{
 		if (clip == null)
