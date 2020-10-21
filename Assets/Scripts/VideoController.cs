@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Globalization;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Rendering;
@@ -34,6 +36,8 @@ public class VideoController : MonoBehaviour
 	private Hittable increaseVolumeButton;
 	private Slider audioSlider;
 	private Slider audioSliderVR;
+	private float savedAudioVolumePlayer;
+	private float savedAudioVolumePanel;
 
 	public bool videoLoaded;
 
@@ -76,8 +80,9 @@ public class VideoController : MonoBehaviour
 		audioSource = video.gameObject.AddComponent<AudioSource>();
 		audioSource.playOnAwake = false;
 
-		var groups = mixer.FindMatchingGroups("AudioVolumePlayer");
+		LoadVolume();
 		audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Player")[0];
+		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(savedAudioVolumePlayer));
 
 		playing = video.isPlaying;
 
@@ -90,7 +95,7 @@ public class VideoController : MonoBehaviour
 		{
 			audioSliderVR = volumeControlVR.GetComponentInChildren<Slider>();
 			audioSliderVR.interactable = false;
-			audioSliderVR.value = audioSlider.value;
+			audioSliderVR.value = savedAudioVolumePlayer;
 		}
 		if (lowerVolumeGo != null && increaseVolumeGo != null)
 		{
@@ -100,6 +105,7 @@ public class VideoController : MonoBehaviour
 			increaseVolumeButton.onHit.AddListener(IncreaseVolume);
 		}
 
+		audioSlider.value = savedAudioVolumePlayer;
 		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
 	}
 
@@ -352,11 +358,46 @@ public class VideoController : MonoBehaviour
 	public void AudioValueChanged()
 	{
 		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(audioSlider.value));
+		SaveVolume();
 	}
 
 	private float CorrectVolume(float value)
 	{
 		float temp = Mathf.Log10(value) * 20;
 		return temp;
+	}
+
+	private void LoadVolume()
+	{
+		string cookiePath = Path.Combine(Application.persistentDataPath, ".volume");
+
+		if (!File.Exists(cookiePath))
+		{
+			using (StreamWriter writer = File.AppendText(cookiePath))
+			{
+				writer.WriteLine("1.0");
+				writer.WriteLine("1.0");
+			}
+		}
+		StreamReader reader = new StreamReader(cookiePath);
+		var fileContents = reader.ReadToEnd();
+		reader.Close();
+
+		var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+		savedAudioVolumePlayer = float.Parse(lines[0], CultureInfo.InvariantCulture.NumberFormat);
+		savedAudioVolumePanel = float.Parse(lines[1], CultureInfo.InvariantCulture.NumberFormat);
+	}
+
+	private void SaveVolume()
+	{
+		string cookiePath = Path.Combine(Application.persistentDataPath, ".volume");
+
+		if (File.Exists(cookiePath))
+		{
+			StreamWriter writer = new StreamWriter(cookiePath);
+			writer.WriteLine(audioSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
+			writer.WriteLine(savedAudioVolumePanel.ToString("F6", new CultureInfo("en-US").NumberFormat));
+			writer.Close();
+		}
 	}
 }
