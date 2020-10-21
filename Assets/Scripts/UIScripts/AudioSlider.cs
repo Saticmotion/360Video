@@ -16,7 +16,7 @@ public class AudioSlider : MonoBehaviour
 	private bool buttonPressed;
 	private bool isDragging;
 	private float oldAudioValue;
-	private IEnumerator coroutine;
+	private IEnumerator coroutineVolumeSlider;
 
 	void Start()
 	{
@@ -33,7 +33,19 @@ public class AudioSlider : MonoBehaviour
 			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
 		}
 
-		coroutine = ShowSlider(2f);
+		coroutineVolumeSlider = ShowSlider(2f);
+	}
+
+	private void OnEnable()
+	{
+		if (coroutineVolumeSlider != null)
+		{
+			StopCoroutine(coroutineVolumeSlider);
+		}
+
+		slider.handleRect.gameObject.SetActive(false);
+		slider.fillRect.gameObject.SetActive(false);
+		background.gameObject.SetActive(false);
 	}
 
 	void Update()
@@ -101,9 +113,9 @@ public class AudioSlider : MonoBehaviour
 			Mute();
 		}
 		
-		StopCoroutine(coroutine);
-		coroutine = ShowSlider(2f);
-		StartCoroutine(coroutine);
+		StopCoroutine(coroutineVolumeSlider);
+		coroutineVolumeSlider = ShowSlider(2f);
+		StartCoroutine(coroutineVolumeSlider);
 	}
 	private void IncreaseVolume()
 	{
@@ -112,9 +124,9 @@ public class AudioSlider : MonoBehaviour
 			Mute();
 		}
 
-		StopCoroutine(coroutine);
-		coroutine = ShowSlider(2f);
-		StartCoroutine(coroutine);
+		StopCoroutine(coroutineVolumeSlider);
+		coroutineVolumeSlider = ShowSlider(2f);
+		StartCoroutine(coroutineVolumeSlider);
 	}
 
 	private IEnumerator ShowSlider(float delay)

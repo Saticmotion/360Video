@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -23,6 +25,8 @@ public class VideoPanel : MonoBehaviour
 	public Button increaseVolumeButton;
 	public AudioMixer mixer;
 	public AudioMixerGroup mixerGroup;
+
+	private float savedAudioVolumePanel;
 
 	public void Update()
 	{
@@ -56,16 +60,12 @@ public class VideoPanel : MonoBehaviour
 		{
 			lowerVolumeButton.onClick.AddListener(LowerVolume);
 			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
-			//TODO(Jitse): Read value from file
 		}
 
-		//NOTE(Jitse): Check if in Editor
-		if (audioSlider != null)
-		{
-			audioSlider.onValueChanged.AddListener( _ => AudioValueChanged());
-			mixer.SetFloat("AudioVolumePanel", CorrectVolume(audioSlider.value));
-			//TODO(Jitse): Read value from file
-		}
+		LoadVolume();
+		audioSlider.onValueChanged.AddListener( _ => AudioValueChanged());
+		mixer.SetFloat("AudioVolumePanel", CorrectVolume(savedAudioVolumePanel));
+		audioSlider.value = savedAudioVolumePanel;
 
 		//NOTE(Simon): Make sure we have added the events
 		controlButton.onClick.RemoveListener(TogglePlay);
@@ -137,11 +137,50 @@ public class VideoPanel : MonoBehaviour
 	public void AudioValueChanged()
 	{
 		mixer.SetFloat("AudioVolumePanel", CorrectVolume(audioSlider.value));
+		SaveVolume();
 	}
 
 	private float CorrectVolume(float value)
 	{
 		float temp = Mathf.Log10(value) * 20;
 		return temp;
+	}
+
+	private void LoadVolume()
+	{
+		string cookiePath = Path.Combine(Application.persistentDataPath, ".volume");
+
+		if (!File.Exists(cookiePath))
+		{
+			using (StreamWriter writer = File.AppendText(cookiePath))
+			{
+				writer.WriteLine("1.0");
+				writer.WriteLine("1.0");
+			}
+		}
+		StreamReader reader = new StreamReader(cookiePath);
+		var fileContents = reader.ReadToEnd();
+		reader.Close();
+
+		var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+		savedAudioVolumePanel = float.Parse(lines[1], CultureInfo.InvariantCulture.NumberFormat);
+	}
+
+	private void SaveVolume()
+	{
+		string cookiePath = Path.Combine(Application.persistentDataPath, ".volume");
+
+		if (File.Exists(cookiePath))
+		{
+			StreamReader reader = new StreamReader(cookiePath);
+			var fileContents = reader.ReadToEnd();
+			reader.Close();
+
+			var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+			StreamWriter writer = new StreamWriter(cookiePath);
+			writer.WriteLine(lines[0]);
+			writer.WriteLine(audioSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
+			writer.Close();
+		}
 	}
 }

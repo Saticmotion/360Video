@@ -26,7 +26,6 @@ public class AudioControl : MonoBehaviour
 	private AudioSource audioSource;
 	private AudioClip clip;
 
-	private float savedAudioVolumePlayer;
 	private float savedAudioVolumePanel;
 
 	private string url;
@@ -183,7 +182,6 @@ public class AudioControl : MonoBehaviour
 		reader.Close();
 
 		var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-		savedAudioVolumePlayer = float.Parse(lines[0], CultureInfo.InvariantCulture.NumberFormat);
 		savedAudioVolumePanel = float.Parse(lines[1], CultureInfo.InvariantCulture.NumberFormat);
 	}
 
