@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -177,6 +178,7 @@ public class Editor : MonoBehaviour
 	public RectTransform timelineHeader;
 	public GameObject timelineRowPrefab;
 	public Text labelPrefab;
+	public AudioMixer mixer;
 
 	private List<Text> headerLabels = new List<Text>();
 	private VideoController videoController;
@@ -245,6 +247,7 @@ public class Editor : MonoBehaviour
 
 		fileLoader = GameObject.Find("FileLoader").GetComponent<FileLoader>();
 		videoController = fileLoader.controller;
+		videoController.mixer = mixer;
 		VideoControls.videoController = videoController;
 		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
 		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());

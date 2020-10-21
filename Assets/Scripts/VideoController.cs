@@ -1,6 +1,9 @@
 ﻿using System.IO;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityEngine.Video;
 
 public struct ScreenshotParams
@@ -24,6 +27,13 @@ public class VideoController : MonoBehaviour
 	public bool playing = true;
 	public RenderTexture baseRenderTexture;
 	public AudioSource audioSource;
+	public AudioMixer mixer;
+
+	private AudioMixerGroup mixerGroup;
+	private Hittable lowerVolumeButton;
+	private Hittable increaseVolumeButton;
+	private Slider audioSlider;
+	private Slider audioSliderVR;
 
 	public bool videoLoaded;
 
@@ -66,7 +76,31 @@ public class VideoController : MonoBehaviour
 		audioSource = video.gameObject.AddComponent<AudioSource>();
 		audioSource.playOnAwake = false;
 
+		var groups = mixer.FindMatchingGroups("AudioVolumePlayer");
+		audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Player")[0];
+
 		playing = video.isPlaying;
+
+		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
+		var volumeControlVR = GameObject.Find("VolumeControlVR");
+		var lowerVolumeGo = GameObject.Find("LowerVolume");
+		var increaseVolumeGo = GameObject.Find("IncreaseVolume");
+
+		if (volumeControlVR != null)
+		{
+			audioSliderVR = volumeControlVR.GetComponentInChildren<Slider>();
+			audioSliderVR.interactable = false;
+			audioSliderVR.value = audioSlider.value;
+		}
+		if (lowerVolumeGo != null && increaseVolumeGo != null)
+		{
+			lowerVolumeButton = GameObject.Find("LowerVolume").GetComponent<Hittable>();
+			increaseVolumeButton = GameObject.Find("IncreaseVolume").GetComponent<Hittable>();
+			lowerVolumeButton.onHit.AddListener(LowerVolume);
+			increaseVolumeButton.onHit.AddListener(IncreaseVolume);
+		}
+
+		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
 	}
 
 	void Update()
@@ -303,4 +337,26 @@ public class VideoController : MonoBehaviour
 		return video.url;
 	}
 
+	public void LowerVolume()
+	{
+		audioSlider.value -= 0.1f;
+		audioSliderVR.value -= 0.1f;
+	}
+
+	public void IncreaseVolume()
+	{
+		audioSlider.value += 0.1f;
+		audioSliderVR.value += 0.1f;
+	}
+
+	public void AudioValueChanged()
+	{
+		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(audioSlider.value));
+	}
+
+	private float CorrectVolume(float value)
+	{
+		float temp = Mathf.Log10(value) * 20;
+		return temp;
+	}
 }

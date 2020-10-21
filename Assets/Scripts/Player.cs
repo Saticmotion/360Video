@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.XR;
@@ -66,10 +67,7 @@ public class Player : MonoBehaviour
 	private VideoController videoController;
 	private List<GameObject> videoList;
 
-	private Hittable lowerVolumeButton;
-	private Hittable increaseVolumeButton;
-	private Slider audioSlider;
-	private Slider audioSliderVR;
+	public AudioMixer mixer;
 
 	private GameObject indexPanel;
 	private Transform videoCanvas;
@@ -114,17 +112,8 @@ public class Player : MonoBehaviour
 		fileLoader = GameObject.Find("FileLoader").GetComponent<FileLoader>();
 		videoController = fileLoader.controller;
 		videoController.OnSeek += OnSeek;
+		videoController.mixer = mixer;
 		VideoControls.videoController = videoController;
-
-		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
-		audioSliderVR = GameObject.Find("VolumeControlVR").GetComponentInChildren<Slider>();
-		lowerVolumeButton = GameObject.Find("LowerVolume").GetComponent<Hittable>();
-		increaseVolumeButton = GameObject.Find("IncreaseVolume").GetComponent<Hittable>();
-
-		audioSliderVR.interactable = false;
-		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
-		lowerVolumeButton.onHit.AddListener(LowerVolume);
-		increaseVolumeButton.onHit.AddListener(IncreaseVolume);
 
 		OpenFilePanel();
 
@@ -800,38 +789,6 @@ public class Player : MonoBehaviour
 		{
 			mandatoryPauseMessage.SetActive(false);
 		}
-	}
-
-	public void LowerVolume()
-	{
-		if (videoController.audioSource.volume >= 0.1f)
-		{
-			videoController.audioSource.volume -= 0.1f;
-		}
-		else
-		{
-			videoController.audioSource.volume = 0f;
-		}
-
-		audioSliderVR.value = videoController.audioSource.volume;
-	}
-
-	public void IncreaseVolume()
-	{
-		if (videoController.audioSource.volume < 1f)
-		{
-			videoController.audioSource.volume += 0.1f;
-		}
-		else
-		{
-			videoController.audioSource.volume = 1f;
-		}
-
-		audioSliderVR.value = videoController.audioSource.volume;
-	}
-	public void AudioValueChanged()
-	{
-		videoController.audioSource.volume = audioSlider.value;
 	}
 
 	public Controller[] GetControllers()

@@ -55,7 +55,7 @@ public class AudioControl : MonoBehaviour
 		if (audioSlider != null)
 		{
 			audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
-			audioSource.volume = audioSlider.value;
+			mixer.SetFloat("AudioVolumePanel", CorrectVolume(audioSlider.value));
 		}
 	}
 

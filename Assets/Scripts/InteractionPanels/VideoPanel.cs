@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
@@ -20,6 +21,8 @@ public class VideoPanel : MonoBehaviour
 	public Slider audioSlider;
 	public Button lowerVolumeButton;
 	public Button increaseVolumeButton;
+	public AudioMixer mixer;
+	public AudioMixerGroup mixerGroup;
 
 	public void Update()
 	{
@@ -39,6 +42,7 @@ public class VideoPanel : MonoBehaviour
 
 		audioSource = videoPlayer.gameObject.GetOrAddComponent<AudioSource>();
 		audioSource.playOnAwake = false;
+		audioSource.outputAudioMixerGroup = mixerGroup;
 
 		videoPlayer.SetTargetAudioSource(0, audioSource);
 
@@ -59,6 +63,7 @@ public class VideoPanel : MonoBehaviour
 		if (audioSlider != null)
 		{
 			audioSlider.onValueChanged.AddListener( _ => AudioValueChanged());
+			mixer.SetFloat("AudioVolumePanel", CorrectVolume(audioSlider.value));
 			//TODO(Jitse): Read value from file
 		}
 
@@ -121,34 +126,22 @@ public class VideoPanel : MonoBehaviour
 
 	public void LowerVolume()
 	{
-		if (audioSource.volume >= 0.1f)
-		{
-			audioSource.volume -= 0.1f;
-		}
-		else
-		{
-			audioSource.volume = 0f;
-		}
-
-		audioSlider.value = audioSource.volume;
+		audioSlider.value -= 0.1f;
 	}
 
 	public void IncreaseVolume()
 	{
-		if (audioSource.volume < 1f)
-		{
-			audioSource.volume += 0.1f;
-		}
-		else
-		{ 
-			audioSource.volume = 1f;
-		}
-
-		audioSlider.value = audioSource.volume;
+		audioSlider.value += 0.1f;
 	}
 
 	public void AudioValueChanged()
 	{
-		audioSource.volume = audioSlider.value;
+		mixer.SetFloat("AudioVolumePanel", CorrectVolume(audioSlider.value));
+	}
+
+	private float CorrectVolume(float value)
+	{
+		float temp = Mathf.Log10(value) * 20;
+		return temp;
 	}
 }

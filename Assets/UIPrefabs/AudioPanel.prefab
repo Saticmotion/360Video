@@ -660,6 +660,7 @@ MonoBehaviour:
   audioSlider: {fileID: 5943158707138868540}
   lowerVolumeButton: {fileID: 0}
   increaseVolumeButton: {fileID: 0}
+  mixer: {fileID: 24100000, guid: debe3f39655f112408b4d20484701f28, type: 2}
 --- !u!82 &82909644079908390
 AudioSource:
   m_ObjectHideFlags: 0
@@ -669,7 +670,8 @@ AudioSource:
   m_GameObject: {fileID: 1244572654677012}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 143209974160633841, guid: debe3f39655f112408b4d20484701f28,
+    type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1

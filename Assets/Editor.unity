@@ -1556,6 +1556,7 @@ MonoBehaviour:
     type: 3}
   labelPrefab: {fileID: 114245306502253168, guid: 1efc485e7ab1a5d41bb9ec14d2431504,
     type: 3}
+  mixer: {fileID: 24100000, guid: debe3f39655f112408b4d20484701f28, type: 2}
   timelineFirstColumnWidth: {fileID: 173308536}
 --- !u!224 &1802637137
 RectTransform:

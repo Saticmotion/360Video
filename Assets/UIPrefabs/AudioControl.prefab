@@ -424,6 +424,7 @@ MonoBehaviour:
   audioSlider: {fileID: 918650978309474252}
   lowerVolumeButton: {fileID: 3427152893341537874}
   increaseVolumeButton: {fileID: 4636502049789180311}
+  mixer: {fileID: 24100000, guid: debe3f39655f112408b4d20484701f28, type: 2}
 --- !u!1 &1549792327459246
 GameObject:
   m_ObjectHideFlags: 0

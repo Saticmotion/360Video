@@ -27,8 +27,11 @@ public class AudioSlider : MonoBehaviour
 		slider.fillRect.gameObject.SetActive(false);
 		background.gameObject.SetActive(false);
 
-		lowerVolumeButton.onClick.AddListener(LowerVolume);
-		increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+		if (lowerVolumeButton != null && increaseVolumeButton != null)
+		{
+			lowerVolumeButton.onClick.AddListener(LowerVolume);
+			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+		}
 
 		coroutine = ShowSlider(2f);
 	}
