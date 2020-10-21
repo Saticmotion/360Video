@@ -394,9 +394,14 @@ public class VideoController : MonoBehaviour
 
 		if (File.Exists(cookiePath))
 		{
+			StreamReader reader = new StreamReader(cookiePath);
+			var fileContents = reader.ReadToEnd();
+			reader.Close();
+
+			var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 			StreamWriter writer = new StreamWriter(cookiePath);
 			writer.WriteLine(audioSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
-			writer.WriteLine(savedAudioVolumePanel.ToString("F6", new CultureInfo("en-US").NumberFormat));
+			writer.WriteLine(lines[1]);
 			writer.Close();
 		}
 	}
