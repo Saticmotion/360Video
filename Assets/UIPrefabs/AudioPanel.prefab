@@ -657,7 +657,7 @@ MonoBehaviour:
   clipTimeText: {fileID: 114889920858865514}
   iconPlay: {fileID: 2800000, guid: 33656b95c6241cb4686736a803d137bb, type: 3}
   iconPause: {fileID: 2800000, guid: 774f22a79df44f448a8a813691361142, type: 3}
-  audioSlider: {fileID: 5943158707138868540}
+  volumeSlider: {fileID: 5943158707138868540}
   lowerVolumeButton: {fileID: 0}
   increaseVolumeButton: {fileID: 0}
   mixer: {fileID: 24100000, guid: debe3f39655f112408b4d20484701f28, type: 2}

@@ -7,6 +7,8 @@ public class AudioSlider : MonoBehaviour
 {
 	public Button lowerVolumeButton;
 	public Button increaseVolumeButton;
+	public Hittable loverVolumeButtonVR;
+	public Hittable increaseVolumeButtonVR;
 	public RectTransform background;
 	public Slider slider;
 	public Image icon;

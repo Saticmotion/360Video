@@ -17,8 +17,8 @@ public class AudioControl : MonoBehaviour
 	public Texture iconPlay;
 	public Texture iconPause;
 
-	public Slider audioSlider;
-	public Button lowerVolumeButton;
+	public Slider volumeSlider;
+	public Button decreaseVolumeButton;
 	public Button increaseVolumeButton;
 
 	public AudioMixer mixer;
@@ -34,9 +34,8 @@ public class AudioControl : MonoBehaviour
 
 	private bool volumeChanging;
 	private bool increaseButtonPressed;
-	private bool lowerButtonPressed;
-	private float volumeButtonClickStart;
-	private float oldSliderValue;
+	private bool decreaseButtonPressed;
+	private float volumeButtonClickTime;
 
 	void Awake()
 	{
@@ -57,24 +56,24 @@ public class AudioControl : MonoBehaviour
 		this.url = url;
 		StartCoroutine(GetAudioClip(url));
 
-		if (lowerVolumeButton != null)
+		if (decreaseVolumeButton != null)
 		{
-			lowerVolumeButton.onClick.AddListener(LowerVolume);
+			decreaseVolumeButton.onClick.AddListener(LowerVolume);
 			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
 		}
-		if (audioSlider != null)
+		if (volumeSlider != null)
 		{
 			LoadVolume();
-			audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
+			volumeSlider.onValueChanged.AddListener(_ => AudioValueChanged());
 			mixer.SetFloat("AudioVolumePanel", CorrectVolume(savedAudioVolumePanel));
-			audioSlider.value = savedAudioVolumePanel;
+			volumeSlider.value = savedAudioVolumePanel;
 		}
 	}
 	private void OnEnable()
 	{
 		//NOTE(Jitse): Update slider value
 		LoadVolume();
-		audioSlider.value = savedAudioVolumePanel;
+		volumeSlider.value = savedAudioVolumePanel;
 	}
 
 	void Update()
@@ -91,36 +90,34 @@ public class AudioControl : MonoBehaviour
 		{
 			if (!volumeChanging)
 			{
-				Debug.Log("Increase: " + audioSlider.value + " | Bool: " + (audioSlider.value >= oldSliderValue + 0.1 || audioSlider.value == 1.0f) + " | oldSliderValue: " + oldSliderValue);
 				IncreaseVolume();
 				volumeChanging = true;
 			}
-			if (Time.realtimeSinceStartup > volumeButtonClickStart + 0.15)
+			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
 			{
 				volumeChanging = false;
-				volumeButtonClickStart = Time.realtimeSinceStartup;
+				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
 			if (Input.GetMouseButtonUp(0))
 			{
 				increaseButtonPressed = false;
 			}
 		}
-		else if (lowerButtonPressed)
+		else if (decreaseButtonPressed)
 		{
 			if (!volumeChanging)
 			{
-				Debug.Log("Increase: " + audioSlider.value + " | Bool: " + (audioSlider.value >= oldSliderValue + 0.1 || audioSlider.value == 1.0f) + " | oldSliderValue: " + oldSliderValue);
 				LowerVolume();
 				volumeChanging = true;
 			}
-			if (Time.realtimeSinceStartup > volumeButtonClickStart + 0.15)
+			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
 			{
 				volumeChanging = false;
-				volumeButtonClickStart = Time.realtimeSinceStartup;
+				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
 			if (Input.GetMouseButtonUp(0))
 			{
-				lowerButtonPressed = false;
+				decreaseButtonPressed = false;
 			}
 		}
 	}
@@ -199,24 +196,23 @@ public class AudioControl : MonoBehaviour
 
 	public void LowerVolume()
 	{
-		audioSlider.value -= 0.1f;
+		volumeSlider.value -= 0.1f;
 	}
 
 	public void IncreaseVolume()
 	{
-		audioSlider.value += 0.1f;
+		volumeSlider.value += 0.1f;
 	}
 
 	public void AudioValueChanged()
 	{
-		mixer.SetFloat("AudioVolumePanel", CorrectVolume(audioSlider.value));
+		mixer.SetFloat("AudioVolumePanel", CorrectVolume(volumeSlider.value));
 		SaveVolume();
 	}
 
 	private float CorrectVolume(float value)
 	{
-		float temp = Mathf.Log10(value) * 20;
-		return temp;
+		return Mathf.Log10(value) * 20;
 	}
 
 	private void LoadVolume()
@@ -252,7 +248,7 @@ public class AudioControl : MonoBehaviour
 			var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 			StreamWriter writer = new StreamWriter(cookiePath);
 			writer.WriteLine(lines[0]);
-			writer.WriteLine(audioSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
+			writer.WriteLine(volumeSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
 			writer.Close();
 		}
 	}
@@ -260,14 +256,12 @@ public class AudioControl : MonoBehaviour
 	public void OnPointerDownIncreaseButton()
 	{
 		increaseButtonPressed = true;
-		volumeButtonClickStart = Time.realtimeSinceStartup;
-		oldSliderValue = audioSlider.value;
+		volumeButtonClickTime = Time.realtimeSinceStartup;
 	}
 
 	public void OnPointerDownLowerButton()
 	{
-		lowerButtonPressed = true;
-		volumeButtonClickStart = Time.realtimeSinceStartup;
-		oldSliderValue = audioSlider.value;
+		decreaseButtonPressed = true;
+		volumeButtonClickTime = Time.realtimeSinceStartup;
 	}
 }

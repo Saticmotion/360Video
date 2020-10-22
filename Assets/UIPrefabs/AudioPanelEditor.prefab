@@ -1426,9 +1426,10 @@ MonoBehaviour:
   clipTimeText: {fileID: 114168217136020844}
   iconPlay: {fileID: 2800000, guid: 33656b95c6241cb4686736a803d137bb, type: 3}
   iconPause: {fileID: 2800000, guid: 774f22a79df44f448a8a813691361142, type: 3}
-  audioSlider: {fileID: 5314452222548102234}
-  lowerVolumeButton: {fileID: 0}
+  volumeSlider: {fileID: 5314452222548102234}
+  decreaseVolumeButton: {fileID: 0}
   increaseVolumeButton: {fileID: 0}
+  mixer: {fileID: 24100000, guid: debe3f39655f112408b4d20484701f28, type: 2}
 --- !u!82 &82625648432958902
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1438,7 +1439,8 @@ AudioSource:
   m_GameObject: {fileID: 1628994179478650}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 143209974160633841, guid: debe3f39655f112408b4d20484701f28,
+    type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1

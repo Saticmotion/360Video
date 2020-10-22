@@ -88,8 +88,8 @@ GameObject:
   - component: {fileID: 6788154919325098574}
   - component: {fileID: 7864163186227873215}
   - component: {fileID: 6355167026440535219}
-  m_Layer: 0
-  m_Name: LowerVolume
+  m_Layer: 5
+  m_Name: DecreaseVolume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

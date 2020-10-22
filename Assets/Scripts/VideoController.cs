@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -31,13 +30,11 @@ public class VideoController : MonoBehaviour
 	public AudioSource audioSource;
 	public AudioMixer mixer;
 
-	private AudioMixerGroup mixerGroup;
-	private Hittable lowerVolumeButton;
+	private Hittable decreaseVolumeButton;
 	private Hittable increaseVolumeButton;
-	private Slider audioSlider;
-	private Slider audioSliderVR;
-	private float savedAudioVolumePlayer;
-	private float savedAudioVolumePanel;
+	private Slider volumeSlider;
+	private Slider volumeSliderVR;
+	private float savedVolumePlayer;
 
 	public bool videoLoaded;
 
@@ -82,31 +79,31 @@ public class VideoController : MonoBehaviour
 
 		LoadVolume();
 		audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Player")[0];
-		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(savedAudioVolumePlayer));
+		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(savedVolumePlayer));
 
 		playing = video.isPlaying;
 
-		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
+		volumeSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
 		var volumeControlVR = GameObject.Find("VolumeControlVR");
 		var lowerVolumeGo = GameObject.Find("LowerVolume");
 		var increaseVolumeGo = GameObject.Find("IncreaseVolume");
 
 		if (volumeControlVR != null)
 		{
-			audioSliderVR = volumeControlVR.GetComponentInChildren<Slider>();
-			audioSliderVR.interactable = false;
-			audioSliderVR.value = savedAudioVolumePlayer;
+			volumeSliderVR = volumeControlVR.GetComponentInChildren<Slider>();
+			volumeSliderVR.interactable = false;
+			volumeSliderVR.value = savedVolumePlayer;
 		}
 		if (lowerVolumeGo != null && increaseVolumeGo != null)
 		{
-			lowerVolumeButton = GameObject.Find("LowerVolume").GetComponent<Hittable>();
+			decreaseVolumeButton = GameObject.Find("LowerVolume").GetComponent<Hittable>();
 			increaseVolumeButton = GameObject.Find("IncreaseVolume").GetComponent<Hittable>();
-			lowerVolumeButton.onHit.AddListener(LowerVolume);
+			decreaseVolumeButton.onHit.AddListener(DecreaseVolume);
 			increaseVolumeButton.onHit.AddListener(IncreaseVolume);
 		}
 
-		audioSlider.value = savedAudioVolumePlayer;
-		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
+		volumeSlider.value = savedVolumePlayer;
+		volumeSlider.onValueChanged.AddListener(_ => VolumeValueChanged());
 	}
 
 	void Update()
@@ -343,28 +340,27 @@ public class VideoController : MonoBehaviour
 		return video.url;
 	}
 
-	public void LowerVolume()
+	public void DecreaseVolume()
 	{
-		audioSlider.value -= 0.1f;
-		audioSliderVR.value -= 0.1f;
+		volumeSlider.value -= 0.1f;
+		volumeSliderVR.value -= 0.1f;
 	}
 
 	public void IncreaseVolume()
 	{
-		audioSlider.value += 0.1f;
-		audioSliderVR.value += 0.1f;
+		volumeSlider.value += 0.1f;
+		volumeSliderVR.value += 0.1f;
 	}
 
-	public void AudioValueChanged()
+	public void VolumeValueChanged()
 	{
-		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(audioSlider.value));
+		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(volumeSlider.value));
 		SaveVolume();
 	}
 
 	private float CorrectVolume(float value)
 	{
-		float temp = Mathf.Log10(value) * 20;
-		return temp;
+		return Mathf.Log10(value) * 20;
 	}
 
 	private void LoadVolume()
@@ -384,8 +380,7 @@ public class VideoController : MonoBehaviour
 		reader.Close();
 
 		var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-		savedAudioVolumePlayer = float.Parse(lines[0], CultureInfo.InvariantCulture.NumberFormat);
-		savedAudioVolumePanel = float.Parse(lines[1], CultureInfo.InvariantCulture.NumberFormat);
+		savedVolumePlayer = float.Parse(lines[0], CultureInfo.InvariantCulture.NumberFormat);
 	}
 
 	private void SaveVolume()
@@ -400,7 +395,7 @@ public class VideoController : MonoBehaviour
 
 			var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 			StreamWriter writer = new StreamWriter(cookiePath);
-			writer.WriteLine(audioSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
+			writer.WriteLine(volumeSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
 			writer.WriteLine(lines[1]);
 			writer.Close();
 		}
