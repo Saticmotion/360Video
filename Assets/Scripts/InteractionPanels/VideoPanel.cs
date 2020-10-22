@@ -26,10 +26,17 @@ public class VideoPanel : MonoBehaviour
 	public AudioMixer mixer;
 	public AudioMixerGroup mixerGroup;
 
+	private bool volumeChanging;
+	private bool increaseButtonPressed;
+	private bool lowerButtonPressed;
+	private float volumeButtonClickStart;
+	private float oldSliderValue;
 	private float savedAudioVolumePanel;
 
 	public void Update()
 	{
+		CheckButtonStates();
+
 		float time = (float)videoPlayer.time;
 		float length = videoPlayer.frameCount / videoPlayer.frameRate;
 		progressBar.value = time;
@@ -186,5 +193,59 @@ public class VideoPanel : MonoBehaviour
 			writer.WriteLine(audioSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
 			writer.Close();
 		}
+	}
+
+	private void CheckButtonStates()
+	{
+		if (increaseButtonPressed)
+		{
+			if (!volumeChanging)
+			{
+				Debug.Log("Increase: " + audioSlider.value + " | Bool: " + (audioSlider.value >= oldSliderValue + 0.1 || audioSlider.value == 1.0f) + " | oldSliderValue: " + oldSliderValue);
+				IncreaseVolume();
+				volumeChanging = true;
+			}
+			if (Time.realtimeSinceStartup > volumeButtonClickStart + 0.15)
+			{
+				volumeChanging = false;
+				volumeButtonClickStart = Time.realtimeSinceStartup;
+			}
+			if (Input.GetMouseButtonUp(0))
+			{
+				increaseButtonPressed = false;
+			}
+		}
+		else if (lowerButtonPressed)
+		{
+			if (!volumeChanging)
+			{
+				Debug.Log("Increase: " + audioSlider.value + " | Bool: " + (audioSlider.value >= oldSliderValue + 0.1 || audioSlider.value == 1.0f) + " | oldSliderValue: " + oldSliderValue);
+				LowerVolume();
+				volumeChanging = true;
+			}
+			if (Time.realtimeSinceStartup > volumeButtonClickStart + 0.15)
+			{
+				volumeChanging = false;
+				volumeButtonClickStart = Time.realtimeSinceStartup;
+			}
+			if (Input.GetMouseButtonUp(0))
+			{
+				lowerButtonPressed = false;
+			}
+		}
+	}
+
+	public void OnPointerDownIncreaseButton()
+	{
+		increaseButtonPressed = true;
+		volumeButtonClickStart = Time.realtimeSinceStartup;
+		oldSliderValue = audioSlider.value;
+	}
+
+	public void OnPointerDownLowerButton()
+	{
+		lowerButtonPressed = true;
+		volumeButtonClickStart = Time.realtimeSinceStartup;
+		oldSliderValue = audioSlider.value;
 	}
 }

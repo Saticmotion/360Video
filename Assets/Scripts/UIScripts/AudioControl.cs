@@ -70,8 +70,22 @@ public class AudioControl : MonoBehaviour
 			audioSlider.value = savedAudioVolumePanel;
 		}
 	}
+	private void OnEnable()
+	{
+		//NOTE(Jitse): Update slider value
+		LoadVolume();
+		audioSlider.value = savedAudioVolumePanel;
+	}
 
 	void Update()
+	{
+		CheckButtonStates();
+
+		playButtonImage.texture = audioSource.isPlaying ? iconPause : iconPlay;
+		ShowAudioPlayTime();
+	}
+	
+	private void CheckButtonStates()
 	{
 		if (increaseButtonPressed)
 		{
@@ -109,16 +123,6 @@ public class AudioControl : MonoBehaviour
 				lowerButtonPressed = false;
 			}
 		}
-
-		playButtonImage.texture = audioSource.isPlaying ? iconPause : iconPlay;
-		ShowAudioPlayTime();
-	}
-
-	private void OnEnable()
-	{
-		//NOTE(Jitse): Update slider value
-		LoadVolume();
-		audioSlider.value = savedAudioVolumePanel;
 	}
 
 	public void TogglePlay()

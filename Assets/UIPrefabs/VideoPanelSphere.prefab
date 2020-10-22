@@ -1272,6 +1272,60 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4505494916814923598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5954962391228284108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 2
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6119189444971085286}
+          m_MethodName: OnPointerDownVolumeButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 114584674720588140}
+          m_MethodName: OnPointerDownLowerButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6119189444971085286}
+          m_MethodName: OnPointerUpVolumeButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &6566399770625379122
 GameObject:
   m_ObjectHideFlags: 0
@@ -1461,6 +1515,60 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4350644626981697468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9006286003309843841}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 2
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6119189444971085286}
+          m_MethodName: OnPointerDownVolumeButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 114584674720588140}
+          m_MethodName: OnPointerDownIncreaseButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 3
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6119189444971085286}
+          m_MethodName: OnPointerUpVolumeButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1001 &527153891807090181
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1600,6 +1708,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2d262ffaf1a049c4aaa3c804d4cae787, type: 3}
+--- !u!224 &2853515342630593085 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2362536843972441144, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
+    type: 3}
+  m_PrefabInstance: {fileID: 527153891807090181}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6119189444971085286 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6033532446189972451, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
+    type: 3}
+  m_PrefabInstance: {fileID: 527153891807090181}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9532db58247ddcd46b28d87c0ca44b9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8046179487745303335 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7564101474510681378, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
@@ -1612,12 +1738,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &2853515342630593085 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 2362536843972441144, guid: 2d262ffaf1a049c4aaa3c804d4cae787,
-    type: 3}
-  m_PrefabInstance: {fileID: 527153891807090181}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1110774003037322921
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1997,6 +2117,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 05b8f8172e2a4b4458b35fe4d9506a79, type: 3}
+--- !u!114 &6293874690960409114 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6355167026440535219, guid: 05b8f8172e2a4b4458b35fe4d9506a79,
+    type: 3}
+  m_PrefabInstance: {fileID: 1110774003037322921}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5954962391228284108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &5954962391228284108 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6759346328888656485, guid: 05b8f8172e2a4b4458b35fe4d9506a79,
+    type: 3}
+  m_PrefabInstance: {fileID: 1110774003037322921}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8369585708311208740 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8884756306315206029, guid: 05b8f8172e2a4b4458b35fe4d9506a79,
@@ -2018,24 +2156,6 @@ MonoBehaviour:
 --- !u!1 &9006286003309843841 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8328987999892941608, guid: 05b8f8172e2a4b4458b35fe4d9506a79,
-    type: 3}
-  m_PrefabInstance: {fileID: 1110774003037322921}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6293874690960409114 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6355167026440535219, guid: 05b8f8172e2a4b4458b35fe4d9506a79,
-    type: 3}
-  m_PrefabInstance: {fileID: 1110774003037322921}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5954962391228284108}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!1 &5954962391228284108 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6759346328888656485, guid: 05b8f8172e2a4b4458b35fe4d9506a79,
     type: 3}
   m_PrefabInstance: {fileID: 1110774003037322921}
   m_PrefabAsset: {fileID: 0}
