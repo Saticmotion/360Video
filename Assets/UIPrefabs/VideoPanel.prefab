@@ -66,7 +66,7 @@ MonoBehaviour:
   lowerVolumeButton: {fileID: 0}
   increaseVolumeButton: {fileID: 0}
   mixer: {fileID: 24100000, guid: debe3f39655f112408b4d20484701f28, type: 2}
-  mixerGroup: {fileID: 143209974160633841, guid: debe3f39655f112408b4d20484701f28,
+  mixerGroup: {fileID: -3306559756656830567, guid: debe3f39655f112408b4d20484701f28,
     type: 2}
 --- !u!222 &222205240750771376
 CanvasRenderer:

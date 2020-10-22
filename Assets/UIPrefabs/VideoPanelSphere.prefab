@@ -561,7 +561,7 @@ MonoBehaviour:
   lowerVolumeButton: {fileID: 4667732633247320212}
   increaseVolumeButton: {fileID: 6195461894969839959}
   mixer: {fileID: 24100000, guid: debe3f39655f112408b4d20484701f28, type: 2}
-  mixerGroup: {fileID: 143209974160633841, guid: debe3f39655f112408b4d20484701f28,
+  mixerGroup: {fileID: -3306559756656830567, guid: debe3f39655f112408b4d20484701f28,
     type: 2}
 --- !u!1 &1640299939408726
 GameObject:

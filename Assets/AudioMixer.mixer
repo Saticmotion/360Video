@@ -20,7 +20,7 @@ AudioMixerGroupController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Player
+  m_Name: Video
   m_AudioMixer: {fileID: 24100000}
   m_GroupID: cfb1d09b185d19f44be16195cbd7b949
   m_Children: []
@@ -47,6 +47,39 @@ AudioMixerEffectController:
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0
+--- !u!243 &-3306559756656830567
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: VideoInteraction
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: 308af204ab9561c4e816ce5f9fbc475a
+  m_Children: []
+  m_Volume: 59b60ebeaf66a9447b83471953dfa1e6
+  m_Pitch: 7992cb156f015c4419c4f8410b05ec7b
+  m_Send: 00000000000000000000000000000000
+  m_Effects:
+  - {fileID: -1994333795424880788}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
+--- !u!244 &-1994333795424880788
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 27963bbf923bf2846b9eb2ea7b977333
+  m_EffectName: Attenuation
+  m_MixLevel: 6c3c42c47b4392f428a264c4f56f8bd3
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
 --- !u!241 &24100000
 AudioMixerController:
   m_ObjectHideFlags: 0
@@ -63,17 +96,20 @@ AudioMixerController:
   m_EnableSuspend: 1
   m_UpdateMode: 0
   m_ExposedParameters:
-  - guid: e770dbb4e2752eb419134a993e88ba95
-    name: AudioVolume
   - guid: 8913dc6ec74bf8b41b27d944e2e52b3b
-    name: AudioVolumePanel
+    name: AudioInteractionVolume
+  - guid: e770dbb4e2752eb419134a993e88ba95
+    name: MasterVolume
   - guid: 73e75f4b840316343986708ca7311386
-    name: AudioVolumePlayer
+    name: VideoVolume
+  - guid: 59b60ebeaf66a9447b83471953dfa1e6
+    name: VideoInteractionVolume
   m_AudioMixerGroupViews:
   - guids:
     - 59b561567d1fb6d4bbf284943f9fcf49
     - cfb1d09b185d19f44be16195cbd7b949
     - 60ac78ad6611c87488be5c4508bbf51d
+    - 308af204ab9561c4e816ce5f9fbc475a
     name: View
   m_CurrentViewIndex: 0
   m_TargetSnapshot: {fileID: 24500006}
@@ -89,6 +125,7 @@ AudioMixerGroupController:
   m_Children:
   - {fileID: -5908835814446183718}
   - {fileID: 143209974160633841}
+  - {fileID: -3306559756656830567}
   m_Volume: e770dbb4e2752eb419134a993e88ba95
   m_Pitch: 434b2a30e77f1484b94bd65cb6ff7e8d
   m_Send: 00000000000000000000000000000000
@@ -131,7 +168,7 @@ AudioMixerGroupController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Panel
+  m_Name: AudioInteraction
   m_AudioMixer: {fileID: 24100000}
   m_GroupID: 60ac78ad6611c87488be5c4508bbf51d
   m_Children: []

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Globalization;
-using System.IO;
+﻿using System.IO;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -31,13 +28,10 @@ public class VideoController : MonoBehaviour
 	public AudioSource audioSource;
 	public AudioMixer mixer;
 
-	private AudioMixerGroup mixerGroup;
 	private Hittable lowerVolumeButton;
 	private Hittable increaseVolumeButton;
 	private Slider audioSlider;
 	private Slider audioSliderVR;
-	private float savedAudioVolumePlayer;
-	private float savedAudioVolumePanel;
 
 	public bool videoLoaded;
 
@@ -80,9 +74,8 @@ public class VideoController : MonoBehaviour
 		audioSource = video.gameObject.AddComponent<AudioSource>();
 		audioSource.playOnAwake = false;
 
-		LoadVolume();
-		audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Player")[0];
-		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(savedAudioVolumePlayer));
+		audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Video")[0];
+		mixer.SetFloat(Config.mainVideoMixerChannelName, MathHelper.LinearToLogVolume(Config.MainVideoVolume));
 
 		playing = video.isPlaying;
 
@@ -95,7 +88,7 @@ public class VideoController : MonoBehaviour
 		{
 			audioSliderVR = volumeControlVR.GetComponentInChildren<Slider>();
 			audioSliderVR.interactable = false;
-			audioSliderVR.value = savedAudioVolumePlayer;
+			audioSliderVR.value = Config.MainVideoVolume;
 		}
 		if (lowerVolumeGo != null && increaseVolumeGo != null)
 		{
@@ -105,7 +98,7 @@ public class VideoController : MonoBehaviour
 			increaseVolumeButton.onHit.AddListener(IncreaseVolume);
 		}
 
-		audioSlider.value = savedAudioVolumePlayer;
+		audioSlider.value = Config.MainVideoVolume;
 		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
 	}
 
@@ -248,7 +241,7 @@ public class VideoController : MonoBehaviour
 
 		video.Prepare();
 
-		video.prepareCompleted += delegate
+		video.prepareCompleted += _ =>
 		{
 			int videoWidth = video.texture.width;
 			int videoHeight = video.texture.height;
@@ -270,12 +263,12 @@ public class VideoController : MonoBehaviour
 		};
 
 
-		video.errorReceived += delegate (VideoPlayer player, string message)
+		video.errorReceived += (player, message) =>
 		{
 			videoLoaded = false;
 			Debug.LogError(message);
 		};
-		screenshots.errorReceived += delegate (VideoPlayer player, string message)
+		screenshots.errorReceived += (player, message) =>
 		{
 			Debug.LogError(message);
 		};
@@ -357,52 +350,7 @@ public class VideoController : MonoBehaviour
 
 	public void AudioValueChanged()
 	{
-		mixer.SetFloat("AudioVolumePlayer", CorrectVolume(audioSlider.value));
-		SaveVolume();
-	}
-
-	private float CorrectVolume(float value)
-	{
-		float temp = Mathf.Log10(value) * 20;
-		return temp;
-	}
-
-	private void LoadVolume()
-	{
-		string cookiePath = Path.Combine(Application.persistentDataPath, ".volume");
-
-		if (!File.Exists(cookiePath))
-		{
-			using (StreamWriter writer = File.AppendText(cookiePath))
-			{
-				writer.WriteLine("1.0");
-				writer.WriteLine("1.0");
-			}
-		}
-		StreamReader reader = new StreamReader(cookiePath);
-		var fileContents = reader.ReadToEnd();
-		reader.Close();
-
-		var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-		savedAudioVolumePlayer = float.Parse(lines[0], CultureInfo.InvariantCulture.NumberFormat);
-		savedAudioVolumePanel = float.Parse(lines[1], CultureInfo.InvariantCulture.NumberFormat);
-	}
-
-	private void SaveVolume()
-	{
-		string cookiePath = Path.Combine(Application.persistentDataPath, ".volume");
-
-		if (File.Exists(cookiePath))
-		{
-			StreamReader reader = new StreamReader(cookiePath);
-			var fileContents = reader.ReadToEnd();
-			reader.Close();
-
-			var lines = fileContents.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-			StreamWriter writer = new StreamWriter(cookiePath);
-			writer.WriteLine(audioSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
-			writer.WriteLine(lines[1]);
-			writer.Close();
-		}
+		mixer.SetFloat(Config.mainVideoMixerChannelName, MathHelper.LinearToLogVolume(audioSlider.value));
+		Config.MainVideoVolume = audioSlider.value;
 	}
 }
