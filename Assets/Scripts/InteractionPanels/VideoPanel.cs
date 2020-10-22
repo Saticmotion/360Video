@@ -61,8 +61,9 @@ public class VideoPanel : MonoBehaviour
 
 		title.text = newTitle;
 
-		//NOTE(Jitse): Check if in Player
-		if (decreaseVolumeButton != null)
+		//NOTE(Jitse): The volume buttons are only used in the Player.
+		//NOTE(cont.): This check prevents null reference errors.
+		if (decreaseVolumeButton != null && increaseVolumeButton != null)
 		{
 			decreaseVolumeButton.onClick.AddListener(DecreaseVolume);
 			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
@@ -195,35 +196,43 @@ public class VideoPanel : MonoBehaviour
 
 	private void CheckButtonStates()
 	{
+		//NOTE(Jitse): If volume up button is being held down
 		if (increaseButtonPressed)
 		{
+			//NOTE(Jitse): If volume hasn't changed in the last x seconds
 			if (!volumeChanging)
 			{
 				IncreaseVolume();
 				volumeChanging = true;
 			}
+			//NOTE(Jitse): If x seconds have passed since last volume increase
 			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
 			{
 				volumeChanging = false;
 				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
+			//NOTE(Jitse): If volume up button no longer being held down
 			if (Input.GetMouseButtonUp(0))
 			{
 				increaseButtonPressed = false;
 			}
 		}
+		//NOTE(Jitse): If volume down button is being held down
 		else if (decreaseButtonPressed)
 		{
+			//NOTE(Jitse): If volume hasn't changed in the last x seconds
 			if (!volumeChanging)
 			{
 				DecreaseVolume();
 				volumeChanging = true;
 			}
+			//NOTE(Jitse): If x seconds have passed since last volume decrease
 			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
 			{
 				volumeChanging = false;
 				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
+			//NOTE(Jitse): If volume down button no longer being held down
 			if (Input.GetMouseButtonUp(0))
 			{
 				decreaseButtonPressed = false;
@@ -237,7 +246,7 @@ public class VideoPanel : MonoBehaviour
 		volumeButtonClickTime = Time.realtimeSinceStartup;
 	}
 
-	public void OnPointerDownLowerButton()
+	public void OnPointerDownDecreaseButton()
 	{
 		decreaseButtonPressed = true;
 		volumeButtonClickTime = Time.realtimeSinceStartup;

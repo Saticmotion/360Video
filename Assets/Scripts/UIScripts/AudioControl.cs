@@ -56,18 +56,18 @@ public class AudioControl : MonoBehaviour
 		this.url = url;
 		StartCoroutine(GetAudioClip(url));
 
-		if (decreaseVolumeButton != null)
+		//NOTE(Jitse): The volume buttons are only used in the Player.
+		//NOTE(cont.): This check prevents null reference errors.
+		if (decreaseVolumeButton != null && increaseVolumeButton != null)
 		{
-			decreaseVolumeButton.onClick.AddListener(LowerVolume);
+			decreaseVolumeButton.onClick.AddListener(DecreaseVolume);
 			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
 		}
-		if (volumeSlider != null)
-		{
-			LoadVolume();
-			volumeSlider.onValueChanged.AddListener(_ => AudioValueChanged());
-			mixer.SetFloat("AudioVolumePanel", CorrectVolume(savedAudioVolumePanel));
-			volumeSlider.value = savedAudioVolumePanel;
-		}
+		
+		LoadVolume();
+		volumeSlider.onValueChanged.AddListener(_ => AudioValueChanged());
+		volumeSlider.value = savedAudioVolumePanel;
+		mixer.SetFloat("AudioVolumePanel", CorrectVolume(savedAudioVolumePanel));
 	}
 	private void OnEnable()
 	{
@@ -86,35 +86,43 @@ public class AudioControl : MonoBehaviour
 	
 	private void CheckButtonStates()
 	{
+		//NOTE(Jitse): If volume up button is being held down
 		if (increaseButtonPressed)
 		{
+			//NOTE(Jitse): If volume hasn't changed in the last x seconds
 			if (!volumeChanging)
 			{
 				IncreaseVolume();
 				volumeChanging = true;
 			}
+			//NOTE(Jitse): If x seconds have passed since last volume increase
 			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
 			{
 				volumeChanging = false;
 				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
+			//NOTE(Jitse): If volume up button no longer being held down
 			if (Input.GetMouseButtonUp(0))
 			{
 				increaseButtonPressed = false;
 			}
 		}
+		//NOTE(Jitse): If volume down button is being held down
 		else if (decreaseButtonPressed)
 		{
+			//NOTE(Jitse): If volume hasn't changed in the last x seconds
 			if (!volumeChanging)
 			{
-				LowerVolume();
+				DecreaseVolume();
 				volumeChanging = true;
 			}
+			//NOTE(Jitse): If x seconds have passed since last volume decrease
 			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
 			{
 				volumeChanging = false;
 				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
+			//NOTE(Jitse): If volume down button no longer being held down
 			if (Input.GetMouseButtonUp(0))
 			{
 				decreaseButtonPressed = false;
@@ -194,7 +202,7 @@ public class AudioControl : MonoBehaviour
 		audioTimeSlider.value = currentClipTime;
 	}
 
-	public void LowerVolume()
+	public void DecreaseVolume()
 	{
 		volumeSlider.value -= 0.1f;
 	}
