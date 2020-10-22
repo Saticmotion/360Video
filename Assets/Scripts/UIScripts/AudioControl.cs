@@ -32,9 +32,11 @@ public class AudioControl : MonoBehaviour
 	private float fullClipLength;
 	private float currentClipTime;
 
-	private bool volumeIncreasing;
+	private bool volumeChanging;
 	private bool increaseButtonPressed;
-	private float increaseClickStart;
+	private bool lowerButtonPressed;
+	private float volumeButtonClickStart;
+	private float oldSliderValue;
 
 	void Awake()
 	{
@@ -58,7 +60,7 @@ public class AudioControl : MonoBehaviour
 		if (lowerVolumeButton != null)
 		{
 			lowerVolumeButton.onClick.AddListener(LowerVolume);
-			increaseVolumeButton.onClick.AddListener(IncreaseVolume); //TODO change to IncreaseVolume
+			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
 		}
 		if (audioSlider != null)
 		{
@@ -67,28 +69,44 @@ public class AudioControl : MonoBehaviour
 			mixer.SetFloat("AudioVolumePanel", CorrectVolume(savedAudioVolumePanel));
 			audioSlider.value = savedAudioVolumePanel;
 		}
-
-		volumeIncreasing = false;
-		increaseButtonPressed = false;
 	}
 
 	void Update()
 	{
 		if (increaseButtonPressed)
 		{
-			Debug.Log("buttonPressed = true");
-
-			if (!volumeIncreasing)
+			if (!volumeChanging)
 			{
-				Debug.Log("volumeIncreasing = true");
-
+				Debug.Log("Increase: " + audioSlider.value + " | Bool: " + (audioSlider.value >= oldSliderValue + 0.1 || audioSlider.value == 1.0f) + " | oldSliderValue: " + oldSliderValue);
 				IncreaseVolume();
-				volumeIncreasing = true;
+				volumeChanging = true;
 			}
-			if (Time.realtimeSinceStartup > increaseClickStart + 1)
+			if (Time.realtimeSinceStartup > volumeButtonClickStart + 0.15)
 			{
-				volumeIncreasing = false;
-				increaseClickStart = Time.realtimeSinceStartup;
+				volumeChanging = false;
+				volumeButtonClickStart = Time.realtimeSinceStartup;
+			}
+			if (Input.GetMouseButtonUp(0))
+			{
+				increaseButtonPressed = false;
+			}
+		}
+		else if (lowerButtonPressed)
+		{
+			if (!volumeChanging)
+			{
+				Debug.Log("Increase: " + audioSlider.value + " | Bool: " + (audioSlider.value >= oldSliderValue + 0.1 || audioSlider.value == 1.0f) + " | oldSliderValue: " + oldSliderValue);
+				LowerVolume();
+				volumeChanging = true;
+			}
+			if (Time.realtimeSinceStartup > volumeButtonClickStart + 0.15)
+			{
+				volumeChanging = false;
+				volumeButtonClickStart = Time.realtimeSinceStartup;
+			}
+			if (Input.GetMouseButtonUp(0))
+			{
+				lowerButtonPressed = false;
 			}
 		}
 
@@ -238,11 +256,14 @@ public class AudioControl : MonoBehaviour
 	public void OnPointerDownIncreaseButton()
 	{
 		increaseButtonPressed = true;
-		increaseClickStart = Time.realtimeSinceStartup;
+		volumeButtonClickStart = Time.realtimeSinceStartup;
+		oldSliderValue = audioSlider.value;
 	}
 
-	public void OnPointerUpIncreaseButton()
+	public void OnPointerDownLowerButton()
 	{
-		increaseButtonPressed = false;
+		lowerButtonPressed = true;
+		volumeButtonClickStart = Time.realtimeSinceStartup;
+		oldSliderValue = audioSlider.value;
 	}
 }

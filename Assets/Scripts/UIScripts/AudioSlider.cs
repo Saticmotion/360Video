@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class AudioSlider : MonoBehaviour
@@ -15,6 +16,7 @@ public class AudioSlider : MonoBehaviour
 	private bool muted;
 	private bool buttonPressed;
 	private bool isDragging;
+	private bool volumeChanging;
 	private float oldAudioValue;
 	private IEnumerator coroutineVolumeSlider;
 
@@ -26,12 +28,6 @@ public class AudioSlider : MonoBehaviour
 		slider.handleRect.gameObject.SetActive(false);
 		slider.fillRect.gameObject.SetActive(false);
 		background.gameObject.SetActive(false);
-
-		if (lowerVolumeButton != null && increaseVolumeButton != null)
-		{
-			lowerVolumeButton.onClick.AddListener(LowerVolume);
-			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
-		}
 
 		coroutineVolumeSlider = ShowSlider(2f);
 	}
@@ -62,6 +58,15 @@ public class AudioSlider : MonoBehaviour
 			{
 				background.gameObject.SetActive(false);
 				slider.fillRect.gameObject.SetActive(false);
+			}
+
+			if (volumeChanging)
+			{
+				RefreshSliderCoroutine();
+			}
+			if (Input.GetMouseButtonUp(0))
+			{
+				volumeChanging = false;
 			}
 		}
 	}
@@ -106,29 +111,27 @@ public class AudioSlider : MonoBehaviour
 		muted = !muted;
 	}
 
-	private void LowerVolume()
-	{
-		if (muted)
-		{
-			Mute();
-		}
-		
-		StopCoroutine(coroutineVolumeSlider);
-		coroutineVolumeSlider = ShowSlider(2f);
-		StartCoroutine(coroutineVolumeSlider);
-	}
-	private void IncreaseVolume()
+	public void OnPointerDownVolumeButton()
 	{
 		if (muted)
 		{
 			Mute();
 		}
 
+		volumeChanging = true;
+	}
+
+	public void OnPointerUpVolumeButton()
+	{
+		volumeChanging = false;
+	}
+
+	private void RefreshSliderCoroutine()
+	{
 		StopCoroutine(coroutineVolumeSlider);
 		coroutineVolumeSlider = ShowSlider(2f);
 		StartCoroutine(coroutineVolumeSlider);
 	}
-
 	private IEnumerator ShowSlider(float delay)
 	{
 		background.gameObject.SetActive(true);
