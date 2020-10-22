@@ -69,22 +69,11 @@ public class AudioControl : MonoBehaviour
 		}
 
 		volumeIncreasing = false;
+		increaseButtonPressed = false;
 	}
 
 	void Update()
 	{
-		if (RectTransformUtility.RectangleContainsScreenPoint(
-			increaseVolumeButton.gameObject.GetComponent<RectTransform>(), 
-			Input.mousePosition))
-		{
-			Debug.Log("Hover");
-			if (Input.GetMouseButtonDown(0))
-			{
-				Debug.Log("Click");
-				increaseButtonPressed = true;
-			}
-		}
-
 		if (increaseButtonPressed)
 		{
 			Debug.Log("buttonPressed = true");
@@ -248,12 +237,12 @@ public class AudioControl : MonoBehaviour
 
 	public void OnPointerDownIncreaseButton()
 	{
-		//increaseButtonPressed = true;
-		//increaseClickStart = Time.realtimeSinceStartup;
+		increaseButtonPressed = true;
+		increaseClickStart = Time.realtimeSinceStartup;
 	}
 
 	public void OnPointerUpIncreaseButton()
 	{
-		//increaseButtonPressed = false;
+		increaseButtonPressed = false;
 	}
 }
