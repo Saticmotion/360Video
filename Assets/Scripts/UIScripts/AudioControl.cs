@@ -32,6 +32,10 @@ public class AudioControl : MonoBehaviour
 	private float fullClipLength;
 	private float currentClipTime;
 
+	private bool volumeIncreasing;
+	private bool increaseButtonPressed;
+	private float increaseClickStart;
+
 	void Awake()
 	{
 		audioSource = GetComponent<AudioSource>();
@@ -54,7 +58,7 @@ public class AudioControl : MonoBehaviour
 		if (lowerVolumeButton != null)
 		{
 			lowerVolumeButton.onClick.AddListener(LowerVolume);
-			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
+			increaseVolumeButton.onClick.AddListener(IncreaseVolume); //TODO change to IncreaseVolume
 		}
 		if (audioSlider != null)
 		{
@@ -63,10 +67,42 @@ public class AudioControl : MonoBehaviour
 			mixer.SetFloat("AudioVolumePanel", CorrectVolume(savedAudioVolumePanel));
 			audioSlider.value = savedAudioVolumePanel;
 		}
+
+		volumeIncreasing = false;
 	}
 
 	void Update()
 	{
+		if (RectTransformUtility.RectangleContainsScreenPoint(
+			increaseVolumeButton.gameObject.GetComponent<RectTransform>(), 
+			Input.mousePosition))
+		{
+			Debug.Log("Hover");
+			if (Input.GetMouseButtonDown(0))
+			{
+				Debug.Log("Click");
+				increaseButtonPressed = true;
+			}
+		}
+
+		if (increaseButtonPressed)
+		{
+			Debug.Log("buttonPressed = true");
+
+			if (!volumeIncreasing)
+			{
+				Debug.Log("volumeIncreasing = true");
+
+				IncreaseVolume();
+				volumeIncreasing = true;
+			}
+			if (Time.realtimeSinceStartup > increaseClickStart + 1)
+			{
+				volumeIncreasing = false;
+				increaseClickStart = Time.realtimeSinceStartup;
+			}
+		}
+
 		playButtonImage.texture = audioSource.isPlaying ? iconPause : iconPlay;
 		ShowAudioPlayTime();
 	}
@@ -208,5 +244,16 @@ public class AudioControl : MonoBehaviour
 			writer.WriteLine(audioSlider.value.ToString("F6", new CultureInfo("en-US").NumberFormat));
 			writer.Close();
 		}
+	}
+
+	public void OnPointerDownIncreaseButton()
+	{
+		//increaseButtonPressed = true;
+		//increaseClickStart = Time.realtimeSinceStartup;
+	}
+
+	public void OnPointerUpIncreaseButton()
+	{
+		//increaseButtonPressed = false;
 	}
 }
