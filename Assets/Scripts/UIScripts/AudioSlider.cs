@@ -1,12 +1,9 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class AudioSlider : MonoBehaviour
 {
-	public Button lowerVolumeButton;
-	public Button increaseVolumeButton;
 	public RectTransform background;
 	public Slider slider;
 	public Image icon;
@@ -53,7 +50,8 @@ public class AudioSlider : MonoBehaviour
 		}
 		else
 		{
-			if (!isDragging && !RectTransformUtility.RectangleContainsScreenPoint(slider.GetComponent<RectTransform>(), Input.mousePosition)
+			if (!isDragging
+				&& !RectTransformUtility.RectangleContainsScreenPoint(slider.GetComponent<RectTransform>(), Input.mousePosition)
 				&& !buttonPressed)
 			{
 				background.gameObject.SetActive(false);
@@ -64,6 +62,7 @@ public class AudioSlider : MonoBehaviour
 			{
 				RefreshSliderCoroutine();
 			}
+
 			if (Input.GetMouseButtonUp(0))
 			{
 				volumeChanging = false;
@@ -80,6 +79,7 @@ public class AudioSlider : MonoBehaviour
 	public void OnPointerDownSlider()
 	{
 		oldAudioValue = -1f;
+
 		if (muted)
 		{
 			Mute();
@@ -99,6 +99,7 @@ public class AudioSlider : MonoBehaviour
 			{
 				slider.value = oldAudioValue;
 			}
+
 			icon.sprite = iconDefault;
 		}
 		else
@@ -132,6 +133,7 @@ public class AudioSlider : MonoBehaviour
 		coroutineVolumeSlider = ShowSlider(2f);
 		StartCoroutine(coroutineVolumeSlider);
 	}
+
 	private IEnumerator ShowSlider(float delay)
 	{
 		background.gameObject.SetActive(true);

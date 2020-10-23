@@ -62,8 +62,8 @@ MonoBehaviour:
   videoSurface: {fileID: 114167466339609494}
   videoPlayer: {fileID: 328974316446840502}
   audioSource: {fileID: 0}
-  audioSlider: {fileID: 837689688523906194}
-  lowerVolumeButton: {fileID: 0}
+  volumeSlider: {fileID: 837689688523906194}
+  decreaseVolumeButton: {fileID: 0}
   increaseVolumeButton: {fileID: 0}
   mixer: {fileID: 24100000, guid: debe3f39655f112408b4d20484701f28, type: 2}
   mixerGroup: {fileID: -3306559756656830567, guid: debe3f39655f112408b4d20484701f28,

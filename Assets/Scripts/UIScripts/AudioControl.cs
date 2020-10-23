@@ -14,8 +14,8 @@ public class AudioControl : MonoBehaviour
 	public Texture iconPlay;
 	public Texture iconPause;
 
-	public Slider audioSlider;
-	public Button lowerVolumeButton;
+	public Slider volumeSlider;
+	public Button decreaseVolumeButton;
 	public Button increaseVolumeButton;
 
 	public AudioMixer mixer;
@@ -29,9 +29,8 @@ public class AudioControl : MonoBehaviour
 
 	private bool volumeChanging;
 	private bool increaseButtonPressed;
-	private bool lowerButtonPressed;
-	private float volumeButtonClickStart;
-	private float oldSliderValue;
+	private bool decreaseButtonPressed;
+	private float volumeButtonClickTime;
 
 	void Awake()
 	{
@@ -52,66 +51,77 @@ public class AudioControl : MonoBehaviour
 		this.url = url;
 		StartCoroutine(GetAudioClip(url));
 
-		if (lowerVolumeButton != null)
+		//NOTE(Jitse): The volume buttons are only used in the Player.
+		//NOTE(cont.): This check prevents null reference errors.
+		if (decreaseVolumeButton != null && increaseVolumeButton != null)
 		{
-			lowerVolumeButton.onClick.AddListener(LowerVolume);
+			decreaseVolumeButton.onClick.AddListener(DecreaseVolume);
 			increaseVolumeButton.onClick.AddListener(IncreaseVolume);
 		}
-		if (audioSlider != null)
-		{
-			audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
-			mixer.SetFloat(Config.audioInteractionMixerChannelName, MathHelper.LinearToLogVolume(Config.AudioInteractionVolume));
-			audioSlider.value = Config.AudioInteractionVolume;
-		}
+		
+		volumeSlider.onValueChanged.AddListener(_ => VolumeValueChanged());
+		volumeSlider.value = Config.AudioInteractionVolume;
+		mixer.SetFloat(Config.audioInteractionMixerChannelName, MathHelper.LinearToLogVolume(Config.AudioInteractionVolume));
 	}
 
 	void Update()
 	{
+		CheckButtonStates();
+
+		playButtonImage.texture = audioSource.isPlaying ? iconPause : iconPlay;
+		ShowAudioPlayTime();
+	}
+	
+	private void CheckButtonStates()
+	{
 		if (increaseButtonPressed)
 		{
+			//NOTE(Simon): When button is down, immediately change volume
 			if (!volumeChanging)
 			{
-				Debug.Log("Increase: " + audioSlider.value + " | Bool: " + (audioSlider.value >= oldSliderValue + 0.1 || audioSlider.value == 1.0f) + " | oldSliderValue: " + oldSliderValue);
 				IncreaseVolume();
 				volumeChanging = true;
 			}
-			if (Time.realtimeSinceStartup > volumeButtonClickStart + 0.15)
+	
+			//NOTE(Simon): Every {time interval} change volume
+			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
 			{
 				volumeChanging = false;
-				volumeButtonClickStart = Time.realtimeSinceStartup;
+				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
+			
 			if (Input.GetMouseButtonUp(0))
 			{
 				increaseButtonPressed = false;
 			}
 		}
-		else if (lowerButtonPressed)
+		else if (decreaseButtonPressed)
 		{
+			//NOTE(Simon): When button is down, immediately change volume
 			if (!volumeChanging)
 			{
-				Debug.Log("Increase: " + audioSlider.value + " | Bool: " + (audioSlider.value >= oldSliderValue + 0.1 || audioSlider.value == 1.0f) + " | oldSliderValue: " + oldSliderValue);
-				LowerVolume();
+				DecreaseVolume();
 				volumeChanging = true;
 			}
-			if (Time.realtimeSinceStartup > volumeButtonClickStart + 0.15)
+
+			//NOTE(Simon): Every {time interval} change volume
+			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
 			{
 				volumeChanging = false;
-				volumeButtonClickStart = Time.realtimeSinceStartup;
+				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
+
 			if (Input.GetMouseButtonUp(0))
 			{
-				lowerButtonPressed = false;
+				decreaseButtonPressed = false;
 			}
 		}
-
-		playButtonImage.texture = audioSource.isPlaying ? iconPause : iconPlay;
-		ShowAudioPlayTime();
 	}
 
 	private void OnEnable()
 	{
 		mixer.SetFloat(Config.audioInteractionMixerChannelName, MathHelper.LinearToLogVolume(Config.AudioInteractionVolume));
-		audioSlider.value = Config.AudioInteractionVolume;
+		volumeSlider.value = Config.AudioInteractionVolume;
 	}
 
 	public void TogglePlay()
@@ -186,33 +196,31 @@ public class AudioControl : MonoBehaviour
 		audioTimeSlider.value = currentClipTime;
 	}
 
-	public void LowerVolume()
+	public void DecreaseVolume()
 	{
-		audioSlider.value -= 0.1f;
+		volumeSlider.value -= 0.1f;
 	}
 
 	public void IncreaseVolume()
 	{
-		audioSlider.value += 0.1f;
+		volumeSlider.value += 0.1f;
 	}
 
-	public void AudioValueChanged()
+	public void VolumeValueChanged()
 	{
-		Config.AudioInteractionVolume = audioSlider.value;
-		mixer.SetFloat(Config.audioInteractionMixerChannelName, MathHelper.LinearToLogVolume(audioSlider.value));
+		Config.AudioInteractionVolume = volumeSlider.value;
+		mixer.SetFloat(Config.audioInteractionMixerChannelName, MathHelper.LinearToLogVolume(volumeSlider.value));
 	}
 
 	public void OnPointerDownIncreaseButton()
 	{
 		increaseButtonPressed = true;
-		volumeButtonClickStart = Time.realtimeSinceStartup;
-		oldSliderValue = audioSlider.value;
+		volumeButtonClickTime = Time.realtimeSinceStartup;
 	}
 
 	public void OnPointerDownLowerButton()
 	{
-		lowerButtonPressed = true;
-		volumeButtonClickStart = Time.realtimeSinceStartup;
-		oldSliderValue = audioSlider.value;
+		decreaseButtonPressed = true;
+		volumeButtonClickTime = Time.realtimeSinceStartup;
 	}
 }

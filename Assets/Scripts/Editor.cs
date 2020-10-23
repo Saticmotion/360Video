@@ -249,8 +249,6 @@ public class Editor : MonoBehaviour
 		videoController = fileLoader.controller;
 		videoController.mixer = mixer;
 		VideoControls.videoController = videoController;
-		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
-		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
 		
 		//NOTE(Simon): Login if details were remembered
 		{
@@ -2724,10 +2722,5 @@ public class Editor : MonoBehaviour
 	private static long FileSize(string path)
 	{
 		return new FileInfo(path).Length;
-	}
-
-	private void AudioValueChanged()
-	{
-		videoController.audioSource.volume = audioSlider.value;
 	}
 }

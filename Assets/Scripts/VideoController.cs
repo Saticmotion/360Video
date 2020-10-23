@@ -28,10 +28,10 @@ public class VideoController : MonoBehaviour
 	public AudioSource audioSource;
 	public AudioMixer mixer;
 
-	private Hittable lowerVolumeButton;
+	private Hittable decreaseVolumeButton;
 	private Hittable increaseVolumeButton;
-	private Slider audioSlider;
-	private Slider audioSliderVR;
+	private Slider volumeSlider;
+	private Slider volumeSliderVR;
 
 	public bool videoLoaded;
 
@@ -79,27 +79,27 @@ public class VideoController : MonoBehaviour
 
 		playing = video.isPlaying;
 
-		audioSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
+		volumeSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
 		var volumeControlVR = GameObject.Find("VolumeControlVR");
 		var lowerVolumeGo = GameObject.Find("LowerVolume");
 		var increaseVolumeGo = GameObject.Find("IncreaseVolume");
 
 		if (volumeControlVR != null)
 		{
-			audioSliderVR = volumeControlVR.GetComponentInChildren<Slider>();
-			audioSliderVR.interactable = false;
-			audioSliderVR.value = Config.MainVideoVolume;
+			volumeSliderVR = volumeControlVR.GetComponentInChildren<Slider>();
+			volumeSliderVR.interactable = false;
+			volumeSliderVR.value = Config.MainVideoVolume;
 		}
 		if (lowerVolumeGo != null && increaseVolumeGo != null)
 		{
-			lowerVolumeButton = GameObject.Find("LowerVolume").GetComponent<Hittable>();
+			decreaseVolumeButton = GameObject.Find("LowerVolume").GetComponent<Hittable>();
 			increaseVolumeButton = GameObject.Find("IncreaseVolume").GetComponent<Hittable>();
-			lowerVolumeButton.onHit.AddListener(LowerVolume);
+			decreaseVolumeButton.onHit.AddListener(DecreaseVolume);
 			increaseVolumeButton.onHit.AddListener(IncreaseVolume);
 		}
 
-		audioSlider.value = Config.MainVideoVolume;
-		audioSlider.onValueChanged.AddListener(_ => AudioValueChanged());
+		volumeSlider.value = Config.MainVideoVolume;
+		volumeSlider.onValueChanged.AddListener(_ => VolumeValueChanged());
 	}
 
 	void Update()
@@ -336,21 +336,21 @@ public class VideoController : MonoBehaviour
 		return video.url;
 	}
 
-	public void LowerVolume()
+	public void DecreaseVolume()
 	{
-		audioSlider.value -= 0.1f;
-		audioSliderVR.value -= 0.1f;
+		volumeSlider.value -= 0.1f;
+		volumeSliderVR.value -= 0.1f;
 	}
 
 	public void IncreaseVolume()
 	{
-		audioSlider.value += 0.1f;
-		audioSliderVR.value += 0.1f;
+		volumeSlider.value += 0.1f;
+		volumeSliderVR.value += 0.1f;
 	}
 
-	public void AudioValueChanged()
+	public void VolumeValueChanged()
 	{
-		mixer.SetFloat(Config.mainVideoMixerChannelName, MathHelper.LinearToLogVolume(audioSlider.value));
-		Config.MainVideoVolume = audioSlider.value;
+		mixer.SetFloat(Config.mainVideoMixerChannelName, MathHelper.LinearToLogVolume(volumeSlider.value));
+		Config.MainVideoVolume = volumeSlider.value;
 	}
 }
