@@ -59,6 +59,8 @@ MonoBehaviour:
     type: 3}
   tagPanel: {fileID: 8492929646453990575, guid: d32f2958c4f214c48880afca02996939,
     type: 3}
+  chapterPanel: {fileID: 9167167837232050945, guid: ec855773e0470634a937f4fd4e94407e,
+    type: 3}
   textPanel: {fileID: 114804670035395096, guid: 68aee9630d16f3847ae9673fad651082,
     type: 3}
   textPanelEditor: {fileID: 114857279946337036, guid: 5c435d4d02e1c3a4f95af60a1b75a7f5,

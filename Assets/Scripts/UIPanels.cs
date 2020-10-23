@@ -13,6 +13,7 @@ public class UIPanels : MonoBehaviour
 	public LoginPanel loginPanel;
 	public ExportPanel exportPanel;
 	public TagPanel tagPanel;
+	public ChapterPanel chapterPanel;
 
 	public TextPanel textPanel;
 	public TextPanelEditor textPanelEditor;

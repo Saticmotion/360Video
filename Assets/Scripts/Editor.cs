@@ -170,6 +170,7 @@ public class Editor : MonoBehaviour
 	private LoginPanel loginPanel;
 	private ExplorerPanel explorerPanel;
 	private TagPanel tagPanel;
+	private ChapterPanel chapterPanel;
 	private ExportPanel exportPanel;
 
 	public RectTransform timelineContainer;
@@ -2016,6 +2017,17 @@ public class Editor : MonoBehaviour
 
 		tagPanel = Instantiate(UIPanels.Instance.tagPanel);
 		tagPanel.transform.SetParent(Canvass.main.transform, false);
+	}
+
+	public void ShowChapterPanel()
+	{
+		if (chapterPanel != null)
+		{
+			return;
+		}
+
+		chapterPanel = Instantiate(UIPanels.Instance.chapterPanel);
+		chapterPanel.transform.SetParent(Canvass.main.transform, false);
 	}
 
 	public void ShowExportPanel()
