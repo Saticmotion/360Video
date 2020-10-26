@@ -225,21 +225,19 @@ public class VideoController : MonoBehaviour
 
 	public void PlayFile(string filename)
 	{
+		video.source = VideoSource.Url;
+		video.controlledAudioTrackCount = 1;
+		video.EnableAudioTrack(0, true);
+		video.audioOutputMode = VideoAudioOutputMode.AudioSource;
+		video.SetTargetAudioSource(0, audioSource);
+
+		video.Prepare();
 		video.url = filename;
+
 		if (screenshots != null)
 		{
 			screenshots.url = filename;
 		}
-
-		video.EnableAudioTrack(0, true);
-		video.SetTargetAudioSource(0, audioSource);
-		video.controlledAudioTrackCount = 1;
-
-		//NOTE(Kristof): duct tape to play audio
-		video.enabled = false;
-		video.enabled = true;
-
-		video.Prepare();
 
 		video.prepareCompleted += _ =>
 		{
