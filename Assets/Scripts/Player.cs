@@ -442,6 +442,10 @@ public class Player : MonoBehaviour
 		var tags = SaveFile.ReadTags(tagsPath);
 		TagManager.Instance.SetTags(tags);
 
+		var chaptersPath = Path.Combine(Application.persistentDataPath, data.meta.guid.ToString());
+		var chapters = SaveFile.ReadChapters(chaptersPath);
+		ChapterManager.Instance.SetChapters(chapters);
+
 		//NOTE(Simon): Sort all interactionpoints based on their timing
 		data.points.Sort((x, y) => x.startTime != y.startTime
 										? x.startTime.CompareTo(y.startTime)

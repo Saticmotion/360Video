@@ -44,6 +44,7 @@ public class ChapterPanel : MonoBehaviour
 			newName.image.color = errorColor;
 		}
 	}
+
 	public void AddChapterItem(string name, string description, float time)
 	{
 		var chapterGo = Instantiate(chapterItemPrefab);
@@ -67,5 +68,10 @@ public class ChapterPanel : MonoBehaviour
 	public void OnEditDescription(string _)
 	{
 		newDescription.image.color = Color.white;
+	}
+
+	public void Close()
+	{
+		Destroy(gameObject);
 	}
 }

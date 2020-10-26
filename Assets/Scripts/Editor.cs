@@ -2082,6 +2082,7 @@ public class Editor : MonoBehaviour
 		}
 
 		SaveFile.WriteTags(path, TagManager.Instance.tags);
+		SaveFile.WriteChapters(path, ChapterManager.Instance.chapters);
 
 		CleanExtras();
 		UnsavedChangesTracker.Instance.unsavedChanges = false;
@@ -2116,6 +2117,10 @@ public class Editor : MonoBehaviour
 		var tagsPath = Path.Combine(Application.persistentDataPath, meta.guid.ToString());
 		var tags = SaveFile.ReadTags(tagsPath);
 		TagManager.Instance.SetTags(tags);
+		
+		var chaptersPath = Path.Combine(Application.persistentDataPath, meta.guid.ToString());
+		var chapters = SaveFile.ReadChapters(chaptersPath);
+		ChapterManager.Instance.SetChapters(chapters);
 
 		foreach (var point in data.points)
 		{
