@@ -201,10 +201,12 @@ public class Editor : MonoBehaviour
 	private InteractionPointEditor timelineItemBeingResized;
 	private bool isResizingTimelineItem;
 	private bool isResizingStart;
-	private bool isResizingTimelineVertical;
-	private bool isResizingTimelineHorizontal;
 	private TimeTooltip timeTooltip;
 	public RectTransform timelineFirstColumnWidth;
+	private bool isResizingTimelineVertical;
+	private bool isResizingTimelineHorizontal;
+	private Chapter chapterBeingDragged;
+	private bool isDraggingChapter;
 
 	private Metadata meta;
 	private string userToken = "";
@@ -1277,6 +1279,8 @@ public class Editor : MonoBehaviour
 
 	private void UpdateTimeline()
 	{
+		Texture2D desiredCursor = null;
+
 		timelineStartTime = 0;
 		timelineEndTime = (float)videoController.videoLength;
 		//NOTE(Simon): This happens when a video isn't fully loaded yet. So don't update timeline until it is.
@@ -1400,7 +1404,7 @@ public class Editor : MonoBehaviour
 			timelineLabelsDirty = false;
 		}
 
-		//Note(Simon): Render timeline items
+		//Note(Simon): Render timeline item length indicators
 		foreach (var point in interactionPoints)
 		{
 			var row = point.timelineRow;
@@ -1497,7 +1501,7 @@ public class Editor : MonoBehaviour
 		}
 
 		//Note(Simon): timeline buttons. Looping backwards because we're deleting items from the list.
-		for (var i = interactionPoints.Count - 1; i >= 0; i--)
+		for (int i = interactionPoints.Count - 1; i >= 0; i--)
 		{
 			var point = interactionPoints[i];
 			var edit = point.timelineRow.edit;
@@ -1674,9 +1678,50 @@ public class Editor : MonoBehaviour
 			}
 		}
 
-		Texture2D desiredCursor = null;
+		//NOTE(Simon): Render chapters
+		{
+			if (isDraggingChapter)
+			{
+				chapterBeingDragged.time = Mathf.Clamp(PxToAbsTime(Input.mousePosition.x), 0, (float)videoController.videoLength);
+
+				if (Input.GetMouseButtonUp(0))
+				{
+					isDraggingChapter = false;
+					chapterBeingDragged = null;
+				}
+			}
+			else
+			{
+				for (int i = 0; i < ChapterManager.Instance.chapters.Count; i++)
+				{
+					var chapter = ChapterManager.Instance.chapters[i];
+					//NOTE(Simon): Only draw an interactable line if we're not already interacting with a timelineItem
+					if (!isDraggingTimelineItem && !isResizingTimelineItem)
+					{
+						bool overlap = DrawLineAtTimeCheckOverlap(chapter.time, 3f, 5f, 5f, Color.cyan, Input.mousePosition, 5f);
+
+						if (overlap)
+						{
+							desiredCursor = Cursors.Instance.CursorResizeHorizontal;
+							if (Input.GetMouseButtonDown(0))
+							{
+								isDraggingChapter = true;
+								chapterBeingDragged = chapter;
+							}
+						}
+					}
+				}
+			}
+
+			for (int i = 0; i < ChapterManager.Instance.chapters.Count; i++)
+			{
+				var chapter = ChapterManager.Instance.chapters[i];
+				DrawLineAtTime(chapter.time, chapter == chapterBeingDragged ? 5f : 3f, Color.cyan, 5f);
+			}
+		}
 
 		//Note(Simon): resizing and moving of timeline items
+		if (!isDraggingChapter)
 		{
 			foreach (var point in interactionPoints)
 			{
@@ -1709,7 +1754,7 @@ public class Editor : MonoBehaviour
 				}
 
 				//NOTE(Simon) Check if conditions are met to start a resize or drag operation on a timeline item
-				if (!isDraggingTimelineItem && !isResizingTimelineItem
+				if (!isDraggingTimelineItem && !isResizingTimelineItem && !isDraggingChapter
 					&& Input.GetMouseButtonDown(0) && RectTransformUtility.RectangleContainsScreenPoint(indicatorRect, Input.mousePosition)
 					&& RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition))
 				{
@@ -1810,76 +1855,74 @@ public class Editor : MonoBehaviour
 		}
 
 		//Note(Simon): Resizing of timeline
+		if (!isDraggingTimelineItem && !isResizingTimelineItem && !isDraggingChapter)
 		{
-			if (!isDraggingTimelineItem && !isResizingTimelineItem)
+			if (isResizingTimelineVertical)
 			{
-				if (isResizingTimelineVertical)
+				if (Input.GetMouseButtonUp(0))
 				{
-					if (Input.GetMouseButtonUp(0))
-					{
-						isResizingTimelineVertical = false;
-						desiredCursor = null;
-					}
-
-					var resizeDelta = new Vector2(0, mouseDelta.y);
-					timelineContainer.sizeDelta += resizeDelta;
+					isResizingTimelineVertical = false;
+					desiredCursor = null;
 				}
-				else if (isResizingTimelineHorizontal)
+
+				var resizeDelta = new Vector2(0, mouseDelta.y);
+				timelineContainer.sizeDelta += resizeDelta;
+			}
+			else if (isResizingTimelineHorizontal)
+			{
+				if (Input.GetMouseButtonUp(0))
 				{
-					if (Input.GetMouseButtonUp(0))
+					isResizingTimelineHorizontal = false;
+					desiredCursor = null;
+				}
+
+				//NOTE(Simon): Clamp timeline size to 100px of either side of screen, so it can't go offscreen
+				timelineFirstColumnWidth.sizeDelta = new Vector2(Mathf.Clamp(timelineFirstColumnWidth.sizeDelta.x + mouseDelta.x, 100, Screen.width - 100), timelineFirstColumnWidth.sizeDelta.y);
+				for (int i = 0; i < interactionPoints.Count; i++)
+				{
+					var point = interactionPoints[i];
+					float fudgeFactor = 10;
+					float offset = point.timelineRow.tagShape.rectTransform.sizeDelta.x + fudgeFactor;
+					point.timelineRow.title.rectTransform.sizeDelta = new Vector2(timelineFirstColumnWidth.sizeDelta.x - offset, point.timelineRow.title.rectTransform.sizeDelta.y);
+				}
+
+				DrawLineAtTime(0, 2, Color.black, -3);
+				timelineLabelsDirty = true;
+			}
+			else
+			{
+				var verticalRect = new Rect(new Vector2(0, timelineContainer.rect.height - 4),
+					new Vector2(timelineContainer.rect.width, 4));
+				var horizontalRect = new Rect(new Vector2(timelineOffsetPixels - 2, 0),
+					new Vector2(4, timelineContainer.rect.height - timelineHeader.sizeDelta.y));
+
+				if (verticalRect.Contains(Input.mousePosition))
+				{
+					if (!Cursors.isOverridingCursor)
 					{
-						isResizingTimelineHorizontal = false;
-						desiredCursor = null;
+						desiredCursor = Cursors.Instance.CursorResizeVertical;
 					}
 
-					//NOTE(Simon): Clamp timeline size to 100px of either side of screen, so it can't go offscreen
-					timelineFirstColumnWidth.sizeDelta = new Vector2(Mathf.Clamp(timelineFirstColumnWidth.sizeDelta.x + mouseDelta.x, 100, Screen.width - 100), timelineFirstColumnWidth.sizeDelta.y);
-					for (int i = 0; i < interactionPoints.Count; i++)
+					if (Input.GetMouseButtonDown(0))
 					{
-						var point = interactionPoints[i];
-						float fudgeFactor = 10;
-						float offset = point.timelineRow.tagShape.rectTransform.sizeDelta.x + fudgeFactor;
-						point.timelineRow.title.rectTransform.sizeDelta = new Vector2(timelineFirstColumnWidth.sizeDelta.x - offset, point.timelineRow.title.rectTransform.sizeDelta.y);
+						isResizingTimelineVertical = true;
 					}
-
+				}
+				else if (horizontalRect.Contains(Input.mousePosition))
+				{
 					DrawLineAtTime(0, 2, Color.black, -3);
-					timelineLabelsDirty = true;
-				}
-				else
-				{
-					var verticalRect = new Rect(new Vector2(0, timelineContainer.rect.height - 4),
-						new Vector2(timelineContainer.rect.width, 4));
-					var horizontalRect = new Rect(new Vector2(timelineOffsetPixels - 2, 0),
-						new Vector2(4, timelineContainer.rect.height - timelineHeader.sizeDelta.y));
-
-					if (verticalRect.Contains(Input.mousePosition))
+					if (!Cursors.isOverridingCursor)
 					{
-						if (!Cursors.isOverridingCursor)
-						{
-							desiredCursor = Cursors.Instance.CursorResizeVertical;
-						}
-
-						if (Input.GetMouseButtonDown(0))
-						{
-							isResizingTimelineVertical = true;
-						}
+						desiredCursor = Cursors.Instance.CursorResizeHorizontal;
 					}
-					else if (horizontalRect.Contains(Input.mousePosition))
-					{
-						DrawLineAtTime(0, 2, Color.black, -3);
-						if (!Cursors.isOverridingCursor)
-						{
-							desiredCursor = Cursors.Instance.CursorResizeHorizontal;
-						}
 
-						if (Input.GetMouseButtonDown(0))
-						{
-							isResizingTimelineHorizontal = true;
-						}
+					if (Input.GetMouseButtonDown(0))
+					{
+						isResizingTimelineHorizontal = true;
 					}
 				}
 			}
-		}
+			}
 
 		if (!Cursors.isOverridingCursor)
 		{
@@ -1909,6 +1952,7 @@ public class Editor : MonoBehaviour
 		point.point.GetComponent<SpriteRenderer>().color = Color.red;
 	}
 
+	//NOTE(Simon): Positive topOffset is upwards
 	public void DrawLineAtTime(double time, float thickness, Color color, float topOffset = 0f)
 	{
 		var timePx = TimeToPx(time);
@@ -1921,6 +1965,42 @@ public class Editor : MonoBehaviour
 			new Vector2(timePx, containerHeight - headerHeight + 3 + topOffset),
 			thickness,
 			color);
+	}
+
+	//NOTE(Simon): thickness is default thickness, overlapThickness is thickness if mouse overlaps, checkedThickness is the area that is checked for an overlap (but line is not drawn at that thickness)
+	public bool DrawLineAtTimeCheckOverlap(double time, float thickness, float overlapThickness, float checkedThickness, Color color, Vector2 mousePos, float topOffset = 0f)
+	{
+		var timePx = TimeToPx(time);
+
+		float containerHeight = timelineContainer.sizeDelta.y;
+		float headerHeight = Mathf.Max(0, timelineHeader.sizeDelta.y - timeline.localPosition.y);
+		float lineHeight = containerHeight - headerHeight + 3 + topOffset;
+
+		var overlapRect = new Rect(timePx - (checkedThickness / 2f), 0, checkedThickness, lineHeight);
+
+
+		if (overlapRect.Contains(Input.mousePosition))
+		{
+			UILineRenderer.DrawLine(
+			new Vector2(timePx, 0),
+			new Vector2(timePx, lineHeight),
+			overlapThickness,
+			color);
+
+			return true;
+		}
+		else
+		{
+			UILineRenderer.DrawLine(
+			new Vector2(timePx, 0),
+			new Vector2(timePx, lineHeight),
+			thickness,
+			color);
+
+			return false;
+		}
+
+
 	}
 
 	public void OnMandatoryChanged(InteractionPointEditor point, bool mandatory)
