@@ -14,6 +14,7 @@ public class AudioSlider : MonoBehaviour
 	private bool buttonPressed;
 	private bool isDragging;
 	private bool volumeChanging;
+	private bool hitClicked;
 	private float oldAudioValue;
 	private IEnumerator coroutineVolumeSlider;
 
@@ -63,11 +64,30 @@ public class AudioSlider : MonoBehaviour
 				RefreshSliderCoroutine();
 			}
 
+			if (hitClicked)
+			{
+				RefreshSliderCoroutine();
+			}
+
 			if (Input.GetMouseButtonUp(0))
 			{
 				volumeChanging = false;
 			}
 		}
+	}
+
+	public void OnHit()
+	{
+		if (muted)
+		{
+			Mute();
+		}
+		hitClicked = true;
+	}
+
+	public void OnHitUp()
+	{
+		hitClicked = false;
 	}
 
 	public void OnDragSlider()

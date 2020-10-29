@@ -33,6 +33,11 @@ public class VideoController : MonoBehaviour
 	private Slider volumeSlider;
 	private Slider volumeSliderVR;
 
+	private bool volumeChanging;
+	private bool increaseButtonPressed;
+	private bool decreaseButtonPressed;
+	private float volumeButtonClickTime;
+
 	public bool videoLoaded;
 
 	public double videoLength;
@@ -81,7 +86,7 @@ public class VideoController : MonoBehaviour
 
 		volumeSlider = GameObject.Find("VolumeControl").GetComponentInChildren<Slider>();
 		var volumeControlVR = GameObject.Find("VolumeControlVR");
-		var lowerVolumeGo = GameObject.Find("LowerVolume");
+		var decreaseVolumeGo = GameObject.Find("DecreaseVolume");
 		var increaseVolumeGo = GameObject.Find("IncreaseVolume");
 
 		if (volumeControlVR != null)
@@ -89,13 +94,19 @@ public class VideoController : MonoBehaviour
 			volumeSliderVR = volumeControlVR.GetComponentInChildren<Slider>();
 			volumeSliderVR.interactable = false;
 			volumeSliderVR.value = Config.MainVideoVolume;
+			volumeSliderVR.onValueChanged.AddListener(_ => VolumeValueChangedVR());
 		}
-		if (lowerVolumeGo != null && increaseVolumeGo != null)
+		if (decreaseVolumeGo != null && increaseVolumeGo != null)
 		{
-			decreaseVolumeButton = GameObject.Find("LowerVolume").GetComponent<Hittable>();
-			increaseVolumeButton = GameObject.Find("IncreaseVolume").GetComponent<Hittable>();
+			decreaseVolumeButton = decreaseVolumeGo.GetComponent<Hittable>();
+			increaseVolumeButton = increaseVolumeGo.GetComponent<Hittable>();
 			decreaseVolumeButton.onHit.AddListener(DecreaseVolume);
 			increaseVolumeButton.onHit.AddListener(IncreaseVolume);
+			decreaseVolumeButton.onHitDown.AddListener(OnPointerDownDecreaseButton);
+			increaseVolumeButton.onHitDown.AddListener(OnPointerDownIncreaseButton);
+			decreaseVolumeButton.onHitUp.AddListener(OnPointerUpVolumeButton);
+			increaseVolumeButton.onHitUp.AddListener(OnPointerUpVolumeButton);
+
 		}
 
 		volumeSlider.value = Config.MainVideoVolume;
@@ -104,6 +115,8 @@ public class VideoController : MonoBehaviour
 
 	void Update()
 	{
+		CheckButtonStates();
+
 		videoLength = video.frameCount / video.frameRate;
 		rawCurrentTime = videoLength * (video.frame / (double)video.frameCount);
 		currentFractionalTime = video.frameCount > 0 ? video.frame / (double)video.frameCount : 0;
@@ -329,6 +342,42 @@ public class VideoController : MonoBehaviour
 		}
 	}
 
+	private void CheckButtonStates()
+	{
+		if (increaseButtonPressed)
+		{
+			//NOTE(Simon): When button is down, immediately change volume
+			if (!volumeChanging)
+			{
+				IncreaseVolume();
+				volumeChanging = true;
+			}
+
+			//NOTE(Simon): Every {time interval} change volume
+			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
+			{
+				volumeChanging = false;
+				volumeButtonClickTime = Time.realtimeSinceStartup;
+			}
+		}
+		else if (decreaseButtonPressed)
+		{
+			//NOTE(Simon): When button is down, immediately change volume
+			if (!volumeChanging)
+			{
+				DecreaseVolume();
+				volumeChanging = true;
+			}
+
+			//NOTE(Simon): Every {time interval} change volume
+			if (Time.realtimeSinceStartup > volumeButtonClickTime + 0.15)
+			{
+				volumeChanging = false;
+				volumeButtonClickTime = Time.realtimeSinceStartup;
+			}
+		}
+	}
+
 	public string VideoPath()
 	{
 		return video.url;
@@ -351,4 +400,35 @@ public class VideoController : MonoBehaviour
 		mixer.SetFloat(Config.mainVideoMixerChannelName, MathHelper.LinearToLogVolume(volumeSlider.value));
 		Config.MainVideoVolume = volumeSlider.value;
 	}
+
+	public void VolumeValueChangedVR()
+	{
+		mixer.SetFloat(Config.mainVideoMixerChannelName, MathHelper.LinearToLogVolume(volumeSliderVR.value));
+		Config.MainVideoVolume = volumeSliderVR.value;
+	}
+
+	public void OnPointerDownIncreaseButton()
+	{
+		if (!increaseButtonPressed)
+		{
+			volumeButtonClickTime = Time.realtimeSinceStartup;
+		}
+		increaseButtonPressed = true;
+	}
+
+	public void OnPointerDownDecreaseButton()
+	{
+		if (!decreaseButtonPressed)
+		{
+			volumeButtonClickTime = Time.realtimeSinceStartup;
+		}
+		decreaseButtonPressed = true;
+	}
+
+	public void OnPointerUpVolumeButton()
+	{
+		decreaseButtonPressed = false;
+		increaseButtonPressed = false;
+	}
+
 }

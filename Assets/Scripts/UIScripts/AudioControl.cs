@@ -218,7 +218,7 @@ public class AudioControl : MonoBehaviour
 		volumeButtonClickTime = Time.realtimeSinceStartup;
 	}
 
-	public void OnPointerDownLowerButton()
+	public void OnPointerDownDecreaseButton()
 	{
 		decreaseButtonPressed = true;
 		volumeButtonClickTime = Time.realtimeSinceStartup;

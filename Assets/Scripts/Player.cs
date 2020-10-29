@@ -382,7 +382,11 @@ public class Player : MonoBehaviour
 				{
 					continue;
 				}
-				hittable.hitting = false;
+				//NOTE(Jitse): Check if a hittable is being held down
+				if (!(controllerList[0].triggerDown || controllerList[1].triggerDown))
+				{
+					hittable.hitting = false;
+				}
 				hittable.hovering = false;
 			}
 

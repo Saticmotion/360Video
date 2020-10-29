@@ -230,6 +230,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onHitDown:
+    m_PersistentCalls:
+      m_Calls: []
+  onHitUp:
+    m_PersistentCalls:
+      m_Calls: []
   onHoverStart:
     m_PersistentCalls:
       m_Calls: []
@@ -1449,6 +1455,12 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  onHitDown:
+    m_PersistentCalls:
+      m_Calls: []
+  onHitUp:
+    m_PersistentCalls:
+      m_Calls: []
   onHoverStart:
     m_PersistentCalls:
       m_Calls: []
@@ -1491,7 +1503,7 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 114305585663214966}
-          m_MethodName: OnPointerDownLowerButton
+          m_MethodName: OnPointerDownDecreaseButton
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
