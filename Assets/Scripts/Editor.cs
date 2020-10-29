@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -175,11 +174,14 @@ public class Editor : MonoBehaviour
 
 	public RectTransform timelineContainer;
 	public RectTransform timeline;
-	public RectTransform timelineHeader;
+	public RectTransform timeLabelHolder;
+	public RectTransform chapterLabelHolder;
 	public GameObject timelineRowPrefab;
-	public Text labelPrefab;
+	public Text timeLabelPrefab;
+	public RectTransform chapterLabelPrefab;
 
-	private List<Text> headerLabels = new List<Text>();
+	private List<Text> timeLabels = new List<Text>();
+	private List<RectTransform> chapterLabels = new List<RectTransform>();
 	private VideoController videoController;
 	private FileLoader fileLoader;
 	private InteractionPointEditor pinnedHoverPoint;
@@ -1368,16 +1370,16 @@ public class Editor : MonoBehaviour
 
 			if (timelineLabelsDirty)
 			{
-				while (headerLabels.Count < realNumLabels)
+				while (timeLabels.Count < realNumLabels)
 				{
-					var label = Instantiate(labelPrefab, timelineHeader.transform);
-					headerLabels.Add(label);
+					var label = Instantiate(timeLabelPrefab, timeLabelHolder.transform);
+					timeLabels.Add(label);
 				}
 
-				while (headerLabels.Count > realNumLabels)
+				while (timeLabels.Count > realNumLabels)
 				{
-					Destroy(headerLabels[headerLabels.Count - 1].gameObject);
-					headerLabels.RemoveAt(headerLabels.Count - 1);
+					Destroy(timeLabels[timeLabels.Count - 1].gameObject);
+					timeLabels.RemoveAt(timeLabels.Count - 1);
 				}
 			}
 
@@ -1390,15 +1392,15 @@ public class Editor : MonoBehaviour
 				{
 					if (timelineLabelsDirty)
 					{
-						headerLabels[i].enabled = true;
-						headerLabels[i].text = MathHelper.FormatSeconds(tickTime);
-						headerLabels[i].rectTransform.position = new Vector2(TimeToPx(tickTime), headerLabels[i].rectTransform.position.y);
+						timeLabels[i].enabled = true;
+						timeLabels[i].text = MathHelper.FormatSeconds(tickTime);
+						timeLabels[i].rectTransform.position = new Vector2(TimeToPx(tickTime), timeLabels[i].rectTransform.position.y);
 					}
 					DrawLineAtTime(tickTime, 1, new Color(0, 0, 0, 47f / 255));
 				}
 				else
 				{
-					headerLabels[i].enabled = false;
+					timeLabels[i].enabled = false;
 				}
 			}
 			timelineLabelsDirty = false;
@@ -1660,14 +1662,14 @@ public class Editor : MonoBehaviour
 		//Note(Simon): Render various stuff, such as current time, indicator lines for begin and end of video, and separator lines.
 		{
 			//NOTE(Simon): current time indicator
-			DrawLineAtTime(Seekbar.instance.lastSmoothTime * videoController.videoLength, 3, new Color(0, 0, 0, 150f / 255), 5);
+			DrawLineAtTime(Seekbar.instance.lastSmoothTime * videoController.videoLength, 3, new Color(0, 0, 0, 150f / 255));
 
 			//NOTE(Simon): Top line. Only draw when inside timeline.
 			var offset = new Vector3(0, 0);
-			if (timeline.localPosition.y < timelineHeader.rect.height - offset.y)
+			if (timeline.localPosition.y < timeLabelHolder.rect.height - offset.y)
 			{
 				var headerCoords = new Vector3[4];
-				timelineHeader.GetWorldCorners(headerCoords);
+				timeLabelHolder.GetWorldCorners(headerCoords);
 				UILineRenderer.DrawLine(headerCoords[0] + offset, headerCoords[3] + offset, 1, new Color(0, 0, 0, 47f / 255));
 			}
 			//NOTE(Simon): Start and end
@@ -1680,6 +1682,19 @@ public class Editor : MonoBehaviour
 
 		//NOTE(Simon): Render chapters
 		{
+			var chapters = ChapterManager.Instance.chapters;
+			while (chapters.Count > chapterLabels.Count)
+			{
+				var newLabel = Instantiate(chapterLabelPrefab, chapterLabelHolder.transform);
+				chapterLabels.Add(newLabel);
+			}
+
+			while (chapters.Count < chapterLabels.Count)
+			{
+				Destroy(chapterLabels[chapterLabels.Count - 1].gameObject);
+				chapterLabels.RemoveAt(chapterLabels.Count - 1);
+			}
+
 			if (isDraggingChapter)
 			{
 				chapterBeingDragged.time = Mathf.Clamp(PxToAbsTime(Input.mousePosition.x), 0, (float)videoController.videoLength);
@@ -1692,13 +1707,12 @@ public class Editor : MonoBehaviour
 			}
 			else
 			{
-				for (int i = 0; i < ChapterManager.Instance.chapters.Count; i++)
+				for (int i = 0; i < chapters.Count; i++)
 				{
-					var chapter = ChapterManager.Instance.chapters[i];
 					//NOTE(Simon): Only draw an interactable line if we're not already interacting with a timelineItem
 					if (!isDraggingTimelineItem && !isResizingTimelineItem)
 					{
-						bool overlap = DrawLineAtTimeCheckOverlap(chapter.time, 3f, 5f, 5f, Color.cyan, Input.mousePosition, 5f);
+						bool overlap = DrawLineAtTimeCheckOverlap(chapters[i].time, 2f, 4f, 4f, new Color(.7f, .3f, .3f), Input.mousePosition);
 
 						if (overlap)
 						{
@@ -1706,17 +1720,18 @@ public class Editor : MonoBehaviour
 							if (Input.GetMouseButtonDown(0))
 							{
 								isDraggingChapter = true;
-								chapterBeingDragged = chapter;
+								chapterBeingDragged = chapters[i];
 							}
 						}
 					}
 				}
 			}
 
-			for (int i = 0; i < ChapterManager.Instance.chapters.Count; i++)
+			for (int i = 0; i < chapters.Count; i++)
 			{
-				var chapter = ChapterManager.Instance.chapters[i];
-				DrawLineAtTime(chapter.time, chapter == chapterBeingDragged ? 5f : 3f, Color.cyan, 5f);
+				DrawLineAtTime(chapters[i].time, chapters[i] == chapterBeingDragged ? 4f : 2f, new Color(.7f, .3f, .3f));
+				chapterLabels[i].GetComponentInChildren<Text>().text = $"Ch.{i + 1}";
+				chapterLabels[i].anchoredPosition = new Vector2(TimeToPx(chapters[i].time), 0);
 			}
 		}
 
@@ -1894,7 +1909,7 @@ public class Editor : MonoBehaviour
 				var verticalRect = new Rect(new Vector2(0, timelineContainer.rect.height - 4),
 					new Vector2(timelineContainer.rect.width, 4));
 				var horizontalRect = new Rect(new Vector2(timelineOffsetPixels - 2, 0),
-					new Vector2(4, timelineContainer.rect.height - timelineHeader.sizeDelta.y));
+					new Vector2(4, timelineContainer.rect.height - timeLabelHolder.sizeDelta.y));
 
 				if (verticalRect.Contains(Input.mousePosition))
 				{
@@ -1922,7 +1937,7 @@ public class Editor : MonoBehaviour
 					}
 				}
 			}
-			}
+		}
 
 		if (!Cursors.isOverridingCursor)
 		{
@@ -1958,11 +1973,11 @@ public class Editor : MonoBehaviour
 		var timePx = TimeToPx(time);
 
 		float containerHeight = timelineContainer.sizeDelta.y;
-		float headerHeight = Mathf.Max(0, timelineHeader.sizeDelta.y - timeline.localPosition.y);
+		float headerHeight = Mathf.Max(0, timeLabelHolder.sizeDelta.y - timeline.localPosition.y);
 
 		UILineRenderer.DrawLine(
 			new Vector2(timePx, 0),
-			new Vector2(timePx, containerHeight - headerHeight + 3 + topOffset),
+			new Vector2(timePx, containerHeight - headerHeight + 18 + topOffset),
 			thickness,
 			color);
 	}
@@ -1973,11 +1988,10 @@ public class Editor : MonoBehaviour
 		var timePx = TimeToPx(time);
 
 		float containerHeight = timelineContainer.sizeDelta.y;
-		float headerHeight = Mathf.Max(0, timelineHeader.sizeDelta.y - timeline.localPosition.y);
-		float lineHeight = containerHeight - headerHeight + 3 + topOffset;
+		float headerHeight = Mathf.Max(0, timeLabelHolder.sizeDelta.y - timeline.localPosition.y);
+		float lineHeight = containerHeight - headerHeight + 18 + topOffset;
 
 		var overlapRect = new Rect(timePx - (checkedThickness / 2f), 0, checkedThickness, lineHeight);
-
 
 		if (overlapRect.Contains(Input.mousePosition))
 		{
@@ -1999,8 +2013,6 @@ public class Editor : MonoBehaviour
 
 			return false;
 		}
-
-
 	}
 
 	public void OnMandatoryChanged(InteractionPointEditor point, bool mandatory)

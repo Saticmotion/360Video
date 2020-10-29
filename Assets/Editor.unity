@@ -1340,6 +1340,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 224057706769774768, guid: aab3be2d16499724cad8f16cf9eb9366,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 224241054576667174, guid: aab3be2d16499724cad8f16cf9eb9366,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -1599,7 +1604,9 @@ MonoBehaviour:
   timelineHeader: {fileID: 640492858}
   timelineRowPrefab: {fileID: 1510562832410010, guid: ab528a9b2a4fcd94db45eb80fbc66302,
     type: 3}
-  labelPrefab: {fileID: 114245306502253168, guid: 1efc485e7ab1a5d41bb9ec14d2431504,
+  timeLabelPrefab: {fileID: 114245306502253168, guid: 1efc485e7ab1a5d41bb9ec14d2431504,
+    type: 3}
+  chapterLabelPrefab: {fileID: 5190936729353832982, guid: 381eaf7522b4ff64f8b79da245f08186,
     type: 3}
   timelineFirstColumnWidth: {fileID: 173308536}
 --- !u!224 &1802637137
