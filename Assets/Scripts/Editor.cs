@@ -1643,11 +1643,14 @@ public class Editor : MonoBehaviour
 			if (isDraggingChapter)
 			{
 				chapterBeingDragged.time = Mathf.Clamp(PxToAbsTime(Input.mousePosition.x), 0, (float)videoController.videoLength);
+				var tooltipPos = chapterLabels[chapters.IndexOf(chapterBeingDragged)].position + new Vector3(0, 15);
+				timeTooltip.SetTime(chapterBeingDragged.time, tooltipPos);
 
 				if (Input.GetMouseButtonUp(0))
 				{
 					isDraggingChapter = false;
 					chapterBeingDragged = null;
+					timeTooltip.ResetPosition();
 				}
 			}
 			else
