@@ -4,6 +4,7 @@ using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using UnityEngine.XR;
 
 public struct ScreenshotParams
 {
@@ -37,6 +38,7 @@ public class VideoController : MonoBehaviour
 	private bool increaseButtonPressed;
 	private bool decreaseButtonPressed;
 	private float volumeButtonClickTime;
+	private bool volumeSliderDisabled;
 
 	public bool videoLoaded;
 
@@ -116,6 +118,20 @@ public class VideoController : MonoBehaviour
 	void Update()
 	{
 		CheckButtonStates();
+
+		//TODO(Jitse): Is this the best place to do this? => 
+		//NOTE(Jitse): Remove the volume slider in PlayerInfo and fix position of Time
+		//NOTE(cont.): Doing this here because XRDevice is not yet active in Start()
+		//NOTE(cont.): Using boolean to only run code inside if-check once
+		if (XRSettings.isDeviceActive && !volumeSliderDisabled)
+		{
+			var timeGo = GameObject.Find("Time");
+			Vector3 newPosition = timeGo.transform.localPosition;
+			newPosition.y = 12.5f;
+			timeGo.transform.localPosition = newPosition;
+			volumeSlider.transform.parent.gameObject.SetActive(false);
+			volumeSliderDisabled = true;
+		}
 
 		videoLength = video.frameCount / video.frameRate;
 		rawCurrentTime = videoLength * (video.frame / (double)video.frameCount);

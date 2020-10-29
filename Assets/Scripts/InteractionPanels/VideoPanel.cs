@@ -162,7 +162,6 @@ public class VideoPanel : MonoBehaviour
 				volumeChanging = false;
 				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
-
 			if (Input.GetMouseButtonUp(0))
 			{
 				increaseButtonPressed = false;
@@ -183,7 +182,6 @@ public class VideoPanel : MonoBehaviour
 				volumeChanging = false;
 				volumeButtonClickTime = Time.realtimeSinceStartup;
 			}
-
 			if (Input.GetMouseButtonUp(0))
 			{
 				decreaseButtonPressed = false;
@@ -193,13 +191,25 @@ public class VideoPanel : MonoBehaviour
 
 	public void OnPointerDownIncreaseButton()
 	{
+		if (!increaseButtonPressed)
+		{
+			volumeButtonClickTime = Time.realtimeSinceStartup;
+		}
 		increaseButtonPressed = true;
-		volumeButtonClickTime = Time.realtimeSinceStartup;
 	}
 
 	public void OnPointerDownDecreaseButton()
 	{
+		if (!decreaseButtonPressed)
+		{
+			volumeButtonClickTime = Time.realtimeSinceStartup;
+		}
 		decreaseButtonPressed = true;
-		volumeButtonClickTime = Time.realtimeSinceStartup;
+	}
+
+	public void OnPointerUpVolumeButton()
+	{
+		decreaseButtonPressed = false;
+		increaseButtonPressed = false;
 	}
 }

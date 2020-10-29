@@ -9,6 +9,9 @@ public class AudioSlider : MonoBehaviour
 	public Image icon;
 	public Sprite iconMuted;
 	public Sprite iconDefault;
+	public Sprite icon66;
+	public Sprite icon33;
+	public Sprite icon0;
 
 	private bool muted;
 	private bool buttonPressed;
@@ -74,6 +77,32 @@ public class AudioSlider : MonoBehaviour
 				volumeChanging = false;
 			}
 		}
+
+		SetIconState();
+	}
+
+	private void SetIconState()
+	{
+		if (muted)
+		{
+			icon.sprite = iconMuted;
+		}
+		else if (slider.value <= 0.001)
+		{
+			icon.sprite = icon0;
+		}
+		else if (slider.value <= 0.33)
+		{
+			icon.sprite = icon33;
+		}
+		else if (slider.value <= 0.66)
+		{
+			icon.sprite = icon66;
+		}
+		else
+		{
+			icon.sprite = iconDefault;
+		}
 	}
 
 	public void OnHit()
@@ -119,14 +148,11 @@ public class AudioSlider : MonoBehaviour
 			{
 				slider.value = oldAudioValue;
 			}
-
-			icon.sprite = iconDefault;
 		}
 		else
 		{
 			oldAudioValue = slider.value;
 			slider.value = 0;
-			icon.sprite = iconMuted;
 		}
 
 		muted = !muted;
