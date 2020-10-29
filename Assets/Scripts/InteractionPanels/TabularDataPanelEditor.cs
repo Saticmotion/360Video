@@ -29,6 +29,11 @@ public class TabularDataPanelEditor : MonoBehaviour
 
 	private static Color errorColor = new Color(1, 0.8f, 0.8f, 1f);
 
+	public void OnEnable()
+	{
+		StartCoroutine(UIAnimation.FadeIn(GetComponent<RectTransform>(), GetComponent<CanvasGroup>()));
+	}
+
 	public void Init(string initialTitle, int rows, int columns, List<string> initialTabularData = null)
 	{
 		//NOTE(Jitse): Check to see if data not corrupt.
