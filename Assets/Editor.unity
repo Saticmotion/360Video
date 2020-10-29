@@ -1295,6 +1295,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TimelineContainer
       objectReference: {fileID: 0}
+    - target: {fileID: 1576908378368854, guid: aab3be2d16499724cad8f16cf9eb9366, type: 3}
+      propertyPath: m_Name
+      value: TimeLabels
+      objectReference: {fileID: 0}
     - target: {fileID: 114338803187610216, guid: aab3be2d16499724cad8f16cf9eb9366,
         type: 3}
       propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -1601,7 +1605,8 @@ MonoBehaviour:
     type: 3}
   timelineContainer: {fileID: 1223360285}
   timeline: {fileID: 670066640}
-  timelineHeader: {fileID: 640492858}
+  timeLabelHolder: {fileID: 640492858}
+  chapterLabelHolder: {fileID: 2104054255}
   timelineRowPrefab: {fileID: 1510562832410010, guid: ab528a9b2a4fcd94db45eb80fbc66302,
     type: 3}
   timeLabelPrefab: {fileID: 114245306502253168, guid: 1efc485e7ab1a5d41bb9ec14d2431504,
@@ -1991,6 +1996,12 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 224035420433341334, guid: 952afe5089bbb844f9d3402123092fb5,
     type: 3}
   m_PrefabInstance: {fileID: 1523726097}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &2104054255 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 7708873670549255874, guid: aab3be2d16499724cad8f16cf9eb9366,
+    type: 3}
+  m_PrefabInstance: {fileID: 1616253672}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5216618106451970387
 PrefabInstance:

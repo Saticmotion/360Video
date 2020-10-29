@@ -52,7 +52,7 @@ public class ChapterManager : MonoBehaviour
 		{
 			name = name,
 			description = description,
-			time = 0f,
+			time = 1f,
 			id = indexCounter
 		});
 
