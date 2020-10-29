@@ -1439,61 +1439,6 @@ public class Editor : MonoBehaviour
 			point.timelineRow.indicator.color = tagColor;
 		}
 
-		//NOTE(Simon): Highlight interactionPoint on hover
-		//TODO(Simon): Show preview when hovering over timelineRow
-		if (RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition))
-		{
-			foreach (var point in interactionPoints)
-			{
-				var rectBackground = point.timelineRow.GetComponent<RectTransform>();
-				var rect = point.timelineRow.title.GetComponent<RectTransform>();
-				if (RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition)
-					&& !isDraggingTimelineItem && !isResizingTimelineItem
-					&& editorState == EditorState.Active
-					&& point.panel != null)
-				{
-					HighlightPoint(point);
-
-					var worldCorners = new Vector3[4];
-					rectBackground.GetWorldCorners(worldCorners);
-					var start = new Vector2(worldCorners[0].x, (worldCorners[0].y + worldCorners[1].y) / 2);
-					var end = new Vector2(worldCorners[2].x - 3, (worldCorners[2].y + worldCorners[3].y) / 2);
-					var thickness = worldCorners[1].y - worldCorners[0].y;
-					//NOTE(Simon): Show a darker brackground on hover
-					UILineRenderer.DrawLine(start, end, thickness, new Color(0, 0, 0, 60 / 255f));
-
-					//NOTE(Simon): If none are pinned, show currently hovered point
-					if (pinnedHoverPoint == null)
-					{
-						point.panel.SetActive(true);
-					}
-
-					point.panel.GetComponent<RectTransform>().anchoredPosition = new Vector2(10, timelineContainer.sizeDelta.y + 50);
-
-					if (Input.GetMouseButtonDown(0) && EventSystem.current.currentSelectedGameObject == null)
-					{
-						if (pinnedHoverPoint == point)
-						{
-							UnpinPoint();
-						}
-						else
-						{
-							UnpinPoint();
-
-							PinPoint(point);
-						}
-					}
-				}
-				else
-				{
-					if (pinnedHoverPoint == null && point.panel != null)
-					{
-						point.panel.SetActive(false);
-					}
-				}
-			}
-		}
-
 		//NOTE(Simon): Timeline tag sprites
 		foreach (var point in interactionPoints)
 		{
@@ -1892,7 +1837,7 @@ public class Editor : MonoBehaviour
 				}
 
 				//NOTE(Simon): Clamp timeline size to 100px of either side of screen, so it can't go offscreen
-				timelineFirstColumnWidth.sizeDelta = new Vector2(Mathf.Clamp(timelineFirstColumnWidth.sizeDelta.x + mouseDelta.x, 100, Screen.width - 100), timelineFirstColumnWidth.sizeDelta.y);
+				timelineFirstColumnWidth.sizeDelta = new Vector2(Mathf.Clamp(timelineFirstColumnWidth.sizeDelta.x + mouseDelta.x, 150, Screen.width - 100), timelineFirstColumnWidth.sizeDelta.y);
 				for (int i = 0; i < interactionPoints.Count; i++)
 				{
 					var point = interactionPoints[i];
@@ -1901,14 +1846,14 @@ public class Editor : MonoBehaviour
 					point.timelineRow.title.rectTransform.sizeDelta = new Vector2(timelineFirstColumnWidth.sizeDelta.x - offset, point.timelineRow.title.rectTransform.sizeDelta.y);
 				}
 
-				DrawLineAtTime(0, 2, Color.black, -3);
+				DrawLineAtTime(0, 2, Color.black);
 				timelineLabelsDirty = true;
 			}
 			else
 			{
 				var verticalRect = new Rect(new Vector2(0, timelineContainer.rect.height - 4),
 					new Vector2(timelineContainer.rect.width, 4));
-				var horizontalRect = new Rect(new Vector2(timelineOffsetPixels - 2, 0),
+				var horizontalRect = new Rect(new Vector2(timelineOffsetPixels + 1, 0),
 					new Vector2(4, timelineContainer.rect.height - timeLabelHolder.sizeDelta.y));
 
 				if (verticalRect.Contains(Input.mousePosition))
@@ -1925,7 +1870,7 @@ public class Editor : MonoBehaviour
 				}
 				else if (horizontalRect.Contains(Input.mousePosition))
 				{
-					DrawLineAtTime(0, 2, Color.black, -3);
+					DrawLineAtTime(0, 2, Color.black);
 					if (!Cursors.isOverridingCursor)
 					{
 						desiredCursor = Cursors.Instance.CursorResizeHorizontal;
@@ -1934,6 +1879,61 @@ public class Editor : MonoBehaviour
 					if (Input.GetMouseButtonDown(0))
 					{
 						isResizingTimelineHorizontal = true;
+					}
+				}
+			}
+		}
+
+		//NOTE(Simon): Highlight interactionPoint on hover
+		if (RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition) && !isResizingTimelineHorizontal)
+		{
+			foreach (var point in interactionPoints)
+			{
+				var rectBackground = point.timelineRow.GetComponent<RectTransform>();
+				var rect = point.timelineRow.title.GetComponent<RectTransform>();
+
+				if (RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition)
+					&& !isDraggingTimelineItem && !isResizingTimelineItem
+					&& editorState == EditorState.Active
+					&& point.panel != null)
+				{
+					HighlightPoint(point);
+
+					var worldCorners = new Vector3[4];
+					rectBackground.GetWorldCorners(worldCorners);
+					var start = new Vector2(worldCorners[0].x, (worldCorners[0].y + worldCorners[1].y) / 2);
+					var end = new Vector2(worldCorners[2].x - 3, (worldCorners[2].y + worldCorners[3].y) / 2);
+					var thickness = worldCorners[1].y - worldCorners[0].y;
+					//NOTE(Simon): Show a darker brackground on hover
+					UILineRenderer.DrawLine(start, end, thickness, new Color(0, 0, 0, 60 / 255f));
+
+					//NOTE(Simon): If none are pinned, show currently hovered point
+					if (pinnedHoverPoint == null)
+					{
+						point.panel.SetActive(true);
+					}
+
+					point.panel.GetComponent<RectTransform>().anchoredPosition = new Vector2(10, timelineContainer.sizeDelta.y + 50);
+
+					if (Input.GetMouseButtonDown(0) && EventSystem.current.currentSelectedGameObject == null)
+					{
+						if (pinnedHoverPoint == point)
+						{
+							UnpinPoint();
+						}
+						else
+						{
+							UnpinPoint();
+
+							PinPoint(point);
+						}
+					}
+				}
+				else
+				{
+					if (pinnedHoverPoint == null && point.panel != null)
+					{
+						point.panel.SetActive(false);
 					}
 				}
 			}
