@@ -144,7 +144,7 @@ public class VideoController : MonoBehaviour
 	{
 		var newTime = fractionalTime * videoLength;
 		video.time = newTime;
-		OnSeek.Invoke(newTime);
+		OnSeek?.Invoke(newTime);
 	}
 
 	public void SeekNoTriggers(double time)

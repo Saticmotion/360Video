@@ -179,6 +179,7 @@ public class Editor : MonoBehaviour
 	public GameObject timelineRowPrefab;
 	public Text timeLabelPrefab;
 	public RectTransform chapterLabelPrefab;
+	public RectTransform currentTimeLabel;
 
 	private List<Text> timeLabels = new List<Text>();
 	private List<RectTransform> chapterLabels = new List<RectTransform>();
@@ -1607,7 +1608,12 @@ public class Editor : MonoBehaviour
 		//Note(Simon): Render various stuff, such as current time, indicator lines for begin and end of video, and separator lines.
 		{
 			//NOTE(Simon): current time indicator
-			DrawLineAtTime(Seekbar.instance.lastSmoothTime * videoController.videoLength, 3, new Color(0, 0, 0, 150f / 255));
+			var time = videoController.rawCurrentTime >= 0 ? videoController.rawCurrentTime : 0;
+			DrawLineAtTime(time, 2, new Color(0, 0, 0, 150f / 255));
+			currentTimeLabel.GetComponentInChildren<Text>().text = $"{MathHelper.FormatSeconds(time)}";
+			currentTimeLabel.anchoredPosition = new Vector2(TimeToPx(time), 0);
+
+			//TODO(Simon): Interactivity of current time
 
 			//NOTE(Simon): Top line. Only draw when inside timeline.
 			var offset = new Vector3(0, 0);
@@ -1631,6 +1637,7 @@ public class Editor : MonoBehaviour
 			while (chapters.Count > chapterLabels.Count)
 			{
 				var newLabel = Instantiate(chapterLabelPrefab, chapterLabelHolder.transform);
+				newLabel.SetAsFirstSibling();
 				chapterLabels.Add(newLabel);
 			}
 
