@@ -140,6 +140,18 @@ public class VideoController : MonoBehaviour
 		screenshots.Pause();
 	}
 
+	public void Seek(double newTime)
+	{
+		video.time = newTime;
+		OnSeek?.Invoke(newTime);
+	}
+
+	public void SeekRelative(float delta)
+	{
+		video.time += delta;
+		OnSeek?.Invoke(video.time);
+	}
+
 	public void SeekFractional(float fractionalTime)
 	{
 		var newTime = fractionalTime * videoLength;

@@ -210,6 +210,7 @@ public class Editor : MonoBehaviour
 	private bool isResizingTimelineHorizontal;
 	private Chapter chapterBeingDragged;
 	private bool isDraggingChapter;
+	private bool isDraggingTime;
 
 	private Metadata meta;
 	private string userToken = "";
@@ -1607,13 +1608,39 @@ public class Editor : MonoBehaviour
 
 		//Note(Simon): Render various stuff, such as current time, indicator lines for begin and end of video, and separator lines.
 		{
-			//NOTE(Simon): current time indicator
 			var time = videoController.rawCurrentTime >= 0 ? videoController.rawCurrentTime : 0;
+
+			if (isDraggingTime)
+			{
+				time = PxToAbsTime(Input.mousePosition.x);
+				DrawLineAtTime(time, 4, new Color(0, 0, 0, 150f / 255));
+				desiredCursor = Cursors.Instance.CursorDrag;
+
+				if (Input.GetMouseButtonUp(0))
+				{
+					videoController.Seek(time);
+					isDraggingTime = false;
+				}
+			}
+			else
+			{
+				if (RectTransformUtility.RectangleContainsScreenPoint(currentTimeLabel, Input.mousePosition))
+				{
+					DrawLineAtTime(time, 4, new Color(0, 0, 0, 150f / 255));
+					desiredCursor = Cursors.Instance.CursorDrag;
+
+					if (Input.GetMouseButtonDown(0))
+					{
+						isDraggingTime = true;
+					}
+				}
+			}
+
+			//NOTE(Simon): current time indicator
 			DrawLineAtTime(time, 2, new Color(0, 0, 0, 150f / 255));
 			currentTimeLabel.GetComponentInChildren<Text>().text = $"{MathHelper.FormatSeconds(time)}";
 			currentTimeLabel.anchoredPosition = new Vector2(TimeToPx(time), 0);
 
-			//TODO(Simon): Interactivity of current time
 
 			//NOTE(Simon): Top line. Only draw when inside timeline.
 			var offset = new Vector3(0, 0);
@@ -1652,6 +1679,7 @@ public class Editor : MonoBehaviour
 				chapterBeingDragged.time = Mathf.Clamp(PxToAbsTime(Input.mousePosition.x), 0, (float)videoController.videoLength);
 				var tooltipPos = chapterLabels[chapters.IndexOf(chapterBeingDragged)].position + new Vector3(0, 15);
 				timeTooltip.SetTime(chapterBeingDragged.time, tooltipPos);
+				desiredCursor = Cursors.Instance.CursorDrag;
 
 				if (Input.GetMouseButtonUp(0))
 				{
@@ -1667,11 +1695,13 @@ public class Editor : MonoBehaviour
 					//NOTE(Simon): Only draw an interactable line if we're not already interacting with a timelineItem
 					if (!isDraggingTimelineItem && !isResizingTimelineItem)
 					{
-						bool overlap = DrawLineAtTimeCheckOverlap(chapters[i].time, 2f, 4f, 4f, new Color(.7f, .3f, .3f), Input.mousePosition);
+						DrawLineAtTime(chapters[i].time, 2f, new Color(.7f, .3f, .3f));
+						bool overlap = RectTransformUtility.RectangleContainsScreenPoint(chapterLabels[i], Input.mousePosition);
 
 						if (overlap)
 						{
-							desiredCursor = Cursors.Instance.CursorResizeHorizontal;
+							DrawLineAtTime(chapters[i].time, 4f, new Color(.7f, .3f, .3f));
+							desiredCursor = Cursors.Instance.CursorDrag;
 							if (Input.GetMouseButtonDown(0))
 							{
 								isDraggingChapter = true;
