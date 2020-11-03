@@ -48,6 +48,17 @@ public enum Perspective
 	PerspectiveFlat
 }
 
+public enum TimelineDragMode
+{
+	None,
+	Time,
+	Chapter,
+	TimelineItem,
+	TimelineItemResize,
+	TimelineHorizontal,
+	TimelineVertical
+}
+
 [Serializable]
 public class InteractionPointEditor
 {
@@ -197,20 +208,15 @@ public class Editor : MonoBehaviour
 	private float timelineWidthPixels;
 	private bool timelineLabelsDirty;
 
+	private TimelineDragMode dragMode;
 	private Vector2 prevMousePosition;
 	private Vector2 mouseDelta;
 	private InteractionPointEditor timelineItemBeingDragged;
-	private bool isDraggingTimelineItem;
 	private InteractionPointEditor timelineItemBeingResized;
-	private bool isResizingTimelineItem;
 	private bool isResizingStart;
 	private TimeTooltip timeTooltip;
 	public RectTransform timelineFirstColumnWidth;
-	private bool isResizingTimelineVertical;
-	private bool isResizingTimelineHorizontal;
 	private Chapter chapterBeingDragged;
-	private bool isDraggingChapter;
-	private bool isDraggingTime;
 
 	private Metadata meta;
 	private string userToken = "";
@@ -1300,7 +1306,7 @@ public class Editor : MonoBehaviour
 		}
 
 		//Note(Simon): Zoom timeline
-		if (!(isDraggingTimelineItem || isResizingTimelineItem))
+		if (dragMode == TimelineDragMode.None)
 		{
 			if (RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition))
 			{
@@ -1610,7 +1616,7 @@ public class Editor : MonoBehaviour
 		{
 			var time = videoController.rawCurrentTime >= 0 ? videoController.rawCurrentTime : 0;
 
-			if (isDraggingTime)
+			if (dragMode == TimelineDragMode.Time)
 			{
 				time = PxToAbsTime(Input.mousePosition.x);
 				DrawLineAtTime(time, 4, new Color(0, 0, 0, 150f / 255));
@@ -1619,7 +1625,7 @@ public class Editor : MonoBehaviour
 				if (Input.GetMouseButtonUp(0))
 				{
 					videoController.Seek(time);
-					isDraggingTime = false;
+					dragMode = TimelineDragMode.None;
 				}
 			}
 			else
@@ -1631,7 +1637,7 @@ public class Editor : MonoBehaviour
 
 					if (Input.GetMouseButtonDown(0))
 					{
-						isDraggingTime = true;
+						dragMode = TimelineDragMode.Time;
 					}
 				}
 			}
@@ -1674,7 +1680,7 @@ public class Editor : MonoBehaviour
 				chapterLabels.RemoveAt(chapterLabels.Count - 1);
 			}
 
-			if (isDraggingChapter)
+			if (dragMode == TimelineDragMode.Chapter)
 			{
 				chapterBeingDragged.time = Mathf.Clamp(PxToAbsTime(Input.mousePosition.x), 0, (float)videoController.videoLength);
 				var tooltipPos = chapterLabels[chapters.IndexOf(chapterBeingDragged)].position + new Vector3(0, 15);
@@ -1683,28 +1689,26 @@ public class Editor : MonoBehaviour
 
 				if (Input.GetMouseButtonUp(0))
 				{
-					isDraggingChapter = false;
+					dragMode = TimelineDragMode.None;
 					chapterBeingDragged = null;
 					timeTooltip.ResetPosition();
 				}
 			}
 			else
 			{
-				for (int i = 0; i < chapters.Count; i++)
+				//NOTE(Simon): Only draw an interactable line if we're not already interacting with a timelineItem
+				if (dragMode == TimelineDragMode.None)
 				{
-					//NOTE(Simon): Only draw an interactable line if we're not already interacting with a timelineItem
-					if (!isDraggingTimelineItem && !isResizingTimelineItem)
+					for (int i = 0; i < chapters.Count; i++)
 					{
-						DrawLineAtTime(chapters[i].time, 2f, new Color(.7f, .3f, .3f));
-						bool overlap = RectTransformUtility.RectangleContainsScreenPoint(chapterLabels[i], Input.mousePosition);
-
-						if (overlap)
+						if (RectTransformUtility.RectangleContainsScreenPoint(chapterLabels[i], Input.mousePosition))
 						{
 							DrawLineAtTime(chapters[i].time, 4f, new Color(.7f, .3f, .3f));
 							desiredCursor = Cursors.Instance.CursorDrag;
+
 							if (Input.GetMouseButtonDown(0))
 							{
-								isDraggingChapter = true;
+								dragMode = TimelineDragMode.Chapter;
 								chapterBeingDragged = chapters[i];
 							}
 						}
@@ -1721,72 +1725,64 @@ public class Editor : MonoBehaviour
 		}
 
 		//Note(Simon): resizing and moving of timeline items
-		if (!isDraggingChapter)
 		{
-			foreach (var point in interactionPoints)
+			if (dragMode == TimelineDragMode.None)
 			{
-				var indicatorRect = point.timelineRow.indicator.rectTransform;
-
-				RectTransformUtility.ScreenPointToLocalPointInRectangle(indicatorRect, Input.mousePosition, null, out var rectPixel);
-				var leftAreaX = 5;
-				var rightAreaX = indicatorRect.rect.width - 5;
-
-				//NOTE(Simon): Show correct cursor
-				if (isDraggingTimelineItem || isResizingTimelineItem || RectTransformUtility.RectangleContainsScreenPoint(indicatorRect, Input.mousePosition)
-					&& RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition))
+				foreach (var point in interactionPoints)
 				{
-					if (isDraggingTimelineItem)
-					{
-						desiredCursor = Cursors.Instance.CursorDrag;
-					}
-					else if (isResizingTimelineItem)
-					{
-						desiredCursor = Cursors.Instance.CursorResizeHorizontal;
-					}
-					else if (rectPixel.x < leftAreaX || rectPixel.x > rightAreaX)
-					{
-						desiredCursor = Cursors.Instance.CursorResizeHorizontal;
-					}
-					else
-					{
-						desiredCursor = Cursors.Instance.CursorDrag;
-					}
-				}
+					var indicatorRect = point.timelineRow.indicator.rectTransform;
 
-				//NOTE(Simon) Check if conditions are met to start a resize or drag operation on a timeline item
-				if (!isDraggingTimelineItem && !isResizingTimelineItem && !isDraggingChapter
-					&& Input.GetMouseButtonDown(0) && RectTransformUtility.RectangleContainsScreenPoint(indicatorRect, Input.mousePosition)
-					&& RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition))
-				{
-					if (rectPixel.x < leftAreaX)
-					{
-						isResizingStart = true;
-						isResizingTimelineItem = true;
-						timelineItemBeingResized = point;
-					}
-					else if (rectPixel.x > rightAreaX)
-					{
-						isResizingStart = false;
-						isResizingTimelineItem = true;
-						timelineItemBeingResized = point;
-					}
-					else
-					{
-						isDraggingTimelineItem = true;
-						timelineItemBeingDragged = point;
-					}
+					RectTransformUtility.ScreenPointToLocalPointInRectangle(indicatorRect, Input.mousePosition, null,
+						out var rectPixel);
+					var leftAreaX = 5;
+					var rightAreaX = indicatorRect.rect.width - 5;
 
-					DisableTimelineScroll();
-					break;
+					//NOTE(Simon) Check if conditions are met to start a resize or drag operation on a timeline item
+					if (RectTransformUtility.RectangleContainsScreenPoint(indicatorRect, Input.mousePosition)
+						&& RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition))
+					{
+						if (rectPixel.x < leftAreaX)
+						{
+							desiredCursor = Cursors.Instance.CursorResizeHorizontal;
+							if (Input.GetMouseButtonDown(0))
+							{
+								isResizingStart = true;
+								dragMode = TimelineDragMode.TimelineItemResize;
+								timelineItemBeingResized = point;
+							}
+						}
+						else if (rectPixel.x > rightAreaX)
+						{
+							desiredCursor = Cursors.Instance.CursorResizeHorizontal;
+							if (Input.GetMouseButtonDown(0))
+							{
+								isResizingStart = false;
+								dragMode = TimelineDragMode.TimelineItemResize;
+								timelineItemBeingResized = point;
+							}
+						}
+						else
+						{
+							desiredCursor = Cursors.Instance.CursorDrag;
+							if (Input.GetMouseButtonDown(0))
+							{
+								isResizingStart = false;
+								dragMode = TimelineDragMode.TimelineItem;
+								timelineItemBeingDragged = point;
+							}
+						}
+
+						DisableTimelineScroll();
+						break;
+					}
 				}
 			}
-
-			if (isDraggingTimelineItem)
+			else if (dragMode == TimelineDragMode.TimelineItem)
 			{
 				//NOTE(Simon): End drag operation
 				if (!Input.GetMouseButton(0))
 				{
-					isDraggingTimelineItem = false;
+					dragMode = TimelineDragMode.None;
 					timelineItemBeingDragged = null;
 					timeTooltip.ResetPosition();
 					UnsavedChangesTracker.Instance.unsavedChanges = true;
@@ -1794,28 +1790,43 @@ public class Editor : MonoBehaviour
 				}
 				else
 				{
-					var newStart = Mathf.Max(0.0f, (float)timelineItemBeingDragged.startTime + PxToRelativeTime(mouseDelta.x));
-					var newEnd = Mathf.Min(timelineEndTime, (float)timelineItemBeingDragged.endTime + PxToRelativeTime(mouseDelta.x));
-					if (newStart > 0.0f || newEnd < timelineEndTime)
+					//var newStart = Mathf.Max(0.0f, (float) timelineItemBeingDragged.startTime + PxToRelativeTime(mouseDelta.x));
+					//var newEnd = Mathf.Min(timelineEndTime, (float) timelineItemBeingDragged.endTime + PxToRelativeTime(mouseDelta.x));
+					float newStart = (float)timelineItemBeingDragged.startTime + PxToRelativeTime(mouseDelta.x);
+					float newEnd = (float)timelineItemBeingDragged.endTime + PxToRelativeTime(mouseDelta.x);
+					if (newStart < 0.0f)
 					{
-						timelineItemBeingDragged.startTime = newStart;
-						timelineItemBeingDragged.endTime = newEnd;
-
-						var imageRect = timelineItemBeingDragged.timelineRow.indicator.rectTransform;
-						var tooltipPos = new Vector2(imageRect.position.x + imageRect.rect.width / 2,
-													imageRect.position.y + imageRect.rect.height / 2);
-
-						timeTooltip.SetTime(newStart, newEnd, tooltipPos);
+						float length = newEnd - newStart;
+						newStart = 0;
+						newEnd = length;
 					}
+
+					if (newEnd > timelineEndTime)
+					{
+						float length = newEnd - newStart;
+						newEnd = timelineEndTime;
+						newStart = newEnd - length;
+					}
+
+					timelineItemBeingDragged.startTime = newStart;
+					timelineItemBeingDragged.endTime = newEnd;
+
+					var imageRect = timelineItemBeingDragged.timelineRow.indicator.rectTransform;
+					var tooltipPos = new Vector2(imageRect.position.x + imageRect.rect.width / 2,
+												 imageRect.position.y + imageRect.rect.height / 2);
+
+					timeTooltip.SetTime(newStart, newEnd, tooltipPos);
+
 					HighlightPoint(timelineItemBeingDragged);
+					desiredCursor = Cursors.Instance.CursorDrag;
 				}
 			}
-			else if (isResizingTimelineItem)
+			else if (dragMode == TimelineDragMode.TimelineItemResize)
 			{
 				//NOTE(Simon): End resize operation
 				if (!Input.GetMouseButton(0))
 				{
-					isResizingTimelineItem = false;
+					dragMode = TimelineDragMode.None;
 					timelineItemBeingResized = null;
 					timeTooltip.ResetPosition();
 					UnsavedChangesTracker.Instance.unsavedChanges = true;
@@ -1825,54 +1836,88 @@ public class Editor : MonoBehaviour
 				{
 					if (isResizingStart)
 					{
-						var newStart = Mathf.Max(0.0f, (float)timelineItemBeingResized.startTime + PxToRelativeTime(mouseDelta.x));
+						var newStart = Mathf.Max(0.0f,
+							(float) timelineItemBeingResized.startTime + PxToRelativeTime(mouseDelta.x));
 						if (newStart < timelineItemBeingResized.endTime - 1f)
 						{
 							timelineItemBeingResized.startTime = newStart;
 							var imageRect = timelineItemBeingResized.timelineRow.indicator.rectTransform;
 							var tooltipPos = new Vector2(imageRect.position.x,
-													imageRect.position.y + imageRect.rect.height / 2);
+								imageRect.position.y + imageRect.rect.height / 2);
 
 							timeTooltip.SetTime(newStart, tooltipPos);
 						}
 					}
 					else
 					{
-						var newEnd = Mathf.Min(timelineEndTime, (float)timelineItemBeingResized.endTime + PxToRelativeTime(mouseDelta.x));
+						var newEnd = Mathf.Min(timelineEndTime,
+							(float) timelineItemBeingResized.endTime + PxToRelativeTime(mouseDelta.x));
 						if (newEnd > timelineItemBeingResized.startTime + 1f)
 						{
 							timelineItemBeingResized.endTime = newEnd;
 							var imageRect = timelineItemBeingResized.timelineRow.indicator.rectTransform;
 							var tooltipPos = new Vector2(imageRect.position.x + imageRect.rect.width,
-													imageRect.position.y + imageRect.rect.height / 2);
+								imageRect.position.y + imageRect.rect.height / 2);
 
 							timeTooltip.SetTime(newEnd, tooltipPos);
 						}
 					}
+
 					HighlightPoint(timelineItemBeingResized);
+					desiredCursor = Cursors.Instance.CursorResizeHorizontal;
 				}
 			}
 		}
 
 		//Note(Simon): Resizing of timeline
-		if (!isDraggingTimelineItem && !isResizingTimelineItem && !isDraggingChapter)
 		{
-			if (isResizingTimelineVertical)
+			if (dragMode == TimelineDragMode.None)
+			{
+				var verticalRect = new Rect(new Vector2(0, timelineContainer.rect.height - 4), new Vector2(timelineContainer.rect.width, 4));
+				var horizontalRect = new Rect(new Vector2(timelineOffsetPixels + 1, 0), new Vector2(4, timelineContainer.rect.height - timeLabelHolder.sizeDelta.y));
+
+				if (verticalRect.Contains(Input.mousePosition))
+				{
+					if (!Cursors.isOverridingCursor)
+					{
+						desiredCursor = Cursors.Instance.CursorResizeVertical;
+					}
+
+					if (Input.GetMouseButtonDown(0))
+					{
+						dragMode = TimelineDragMode.TimelineVertical;
+					}
+				}
+				else if (horizontalRect.Contains(Input.mousePosition))
+				{
+					DrawLineAtTime(0, 2, Color.black);
+					if (!Cursors.isOverridingCursor)
+					{
+						desiredCursor = Cursors.Instance.CursorResizeHorizontal;
+					}
+
+					if (Input.GetMouseButtonDown(0))
+					{
+						dragMode = TimelineDragMode.TimelineHorizontal;
+					}
+				}
+			}
+			else if (dragMode == TimelineDragMode.TimelineVertical)
 			{
 				if (Input.GetMouseButtonUp(0))
 				{
-					isResizingTimelineVertical = false;
+					dragMode = TimelineDragMode.None;
 					desiredCursor = null;
 				}
 
 				var resizeDelta = new Vector2(0, mouseDelta.y);
 				timelineContainer.sizeDelta += resizeDelta;
 			}
-			else if (isResizingTimelineHorizontal)
+			else if (dragMode == TimelineDragMode.TimelineHorizontal)
 			{
 				if (Input.GetMouseButtonUp(0))
 				{
-					isResizingTimelineHorizontal = false;
+					dragMode = TimelineDragMode.None;
 					desiredCursor = null;
 				}
 
@@ -1889,43 +1934,10 @@ public class Editor : MonoBehaviour
 				DrawLineAtTime(0, 2, Color.black);
 				timelineLabelsDirty = true;
 			}
-			else
-			{
-				var verticalRect = new Rect(new Vector2(0, timelineContainer.rect.height - 4),
-					new Vector2(timelineContainer.rect.width, 4));
-				var horizontalRect = new Rect(new Vector2(timelineOffsetPixels + 1, 0),
-					new Vector2(4, timelineContainer.rect.height - timeLabelHolder.sizeDelta.y));
-
-				if (verticalRect.Contains(Input.mousePosition))
-				{
-					if (!Cursors.isOverridingCursor)
-					{
-						desiredCursor = Cursors.Instance.CursorResizeVertical;
-					}
-
-					if (Input.GetMouseButtonDown(0))
-					{
-						isResizingTimelineVertical = true;
-					}
-				}
-				else if (horizontalRect.Contains(Input.mousePosition))
-				{
-					DrawLineAtTime(0, 2, Color.black);
-					if (!Cursors.isOverridingCursor)
-					{
-						desiredCursor = Cursors.Instance.CursorResizeHorizontal;
-					}
-
-					if (Input.GetMouseButtonDown(0))
-					{
-						isResizingTimelineHorizontal = true;
-					}
-				}
-			}
 		}
 
 		//NOTE(Simon): Highlight interactionPoint on hover
-		if (RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition) && !isResizingTimelineHorizontal)
+		if (RectTransformUtility.RectangleContainsScreenPoint(timelineContainer, Input.mousePosition) && dragMode == TimelineDragMode.None)
 		{
 			foreach (var point in interactionPoints)
 			{
@@ -1933,17 +1945,16 @@ public class Editor : MonoBehaviour
 				var rect = point.timelineRow.title.GetComponent<RectTransform>();
 
 				if (RectTransformUtility.RectangleContainsScreenPoint(rect, Input.mousePosition)
-					&& !isDraggingTimelineItem && !isResizingTimelineItem
 					&& editorState == EditorState.Active
 					&& point.panel != null)
 				{
 					HighlightPoint(point);
 
-					var worldCorners = new Vector3[4];
-					rectBackground.GetWorldCorners(worldCorners);
-					var start = new Vector2(worldCorners[0].x, (worldCorners[0].y + worldCorners[1].y) / 2);
-					var end = new Vector2(worldCorners[2].x - 3, (worldCorners[2].y + worldCorners[3].y) / 2);
-					var thickness = worldCorners[1].y - worldCorners[0].y;
+					var rowCorners = new Vector3[4];
+					rectBackground.GetWorldCorners(rowCorners);
+					var start = new Vector2(rowCorners[0].x, (rowCorners[0].y + rowCorners[1].y) / 2);
+					var end = new Vector2(rowCorners[2].x - 3, (rowCorners[2].y + rowCorners[3].y) / 2);
+					var thickness = rowCorners[1].y - rowCorners[0].y;
 					//NOTE(Simon): Show a darker brackground on hover
 					UILineRenderer.DrawLine(start, end, thickness, new Color(0, 0, 0, 60 / 255f));
 
