@@ -160,10 +160,12 @@ public class TabularDataPanelSphere : MonoBehaviour
 			{
 				int rowNumber = currentPage * MAXROWSPAGE + i + 1;
 				rowNumberText.text = $"{rowNumber}";
+				rowNumberText.gameObject.SetActive(true);
 			}
 			else
 			{
 				rowNumberText.text = "";
+				rowNumberText.gameObject.SetActive(false);
 			}
 		}
 	}
