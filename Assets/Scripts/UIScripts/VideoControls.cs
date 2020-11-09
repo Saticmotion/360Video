@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class VideoControls : MonoBehaviour
 {
-	public float amount;
 	public Texture iconPlay;
 	public Texture iconPause;
 
@@ -18,7 +17,7 @@ public class VideoControls : MonoBehaviour
 		buttonImage.texture = videoController.playing ? iconPause : iconPlay;
 	}
 
-	public void Skip()
+	public void Skip(float amount)
 	{
 		videoController.SeekRelative(amount);
 	}
