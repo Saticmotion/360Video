@@ -28,19 +28,6 @@ public enum EditorState
 	Exporting
 }
 
-public enum InteractionType
-{
-	None,
-	Text,
-	Image,
-	Video,
-	MultipleChoice,
-	Audio,
-	FindArea,
-	MultipleChoiceArea,
-	MultipleChoiceImage
-}
-
 public enum Perspective
 {
 	Perspective360,
@@ -180,7 +167,7 @@ public class Editor : MonoBehaviour
 	private LoginPanel loginPanel;
 	private ExplorerPanel explorerPanel;
 	private TagPanel tagPanel;
-	private ChapterPanel chapterPanel;
+	private ChapterManagerPanel chapterPanel;
 	private ExportPanel exportPanel;
 
 	public RectTransform timelineContainer;
@@ -445,6 +432,12 @@ public class Editor : MonoBehaviour
 							interactionEditor.GetComponent<MultipleChoiceImagePanelEditor>().Init("", null);
 							break;
 						}
+						case InteractionType.Chapter:
+						{
+							interactionEditor = Instantiate(UIPanels.Instance.chapterPanelEditor, Canvass.main.transform).gameObject;
+							interactionEditor.GetComponent<ChapterPanelEditor>().Init("", -1);
+							break;
+						}
 						default:
 						{
 							Debug.LogError("FFS, you shoulda added it here");
@@ -684,6 +677,22 @@ public class Editor : MonoBehaviour
 						lastPlacedPoint.title = editor.answerQuestion;
 						lastPlacedPoint.body = editor.answerCorrect.ToString();
 						lastPlacedPoint.filename = String.Join("\f", newFilenames);
+						lastPlacedPoint.panel = panel.gameObject;
+
+						finished = true;
+					}
+					break;
+				}
+				case InteractionType.Chapter:
+				{
+					var editor = interactionEditor.GetComponent<ChapterPanelEditor>();
+
+					if (editor.answered)
+					{
+						var panel = Instantiate(UIPanels.Instance.chapterPanel, Canvass.main.transform);
+						panel.Init(editor.answerTitle, editor.answerChapterId);
+						lastPlacedPoint.title = editor.answerTitle;
+						lastPlacedPoint.body = editor.answerChapterId.ToString();
 						lastPlacedPoint.panel = panel.gameObject;
 
 						finished = true;
@@ -2169,7 +2178,7 @@ public class Editor : MonoBehaviour
 			return;
 		}
 
-		chapterPanel = Instantiate(UIPanels.Instance.chapterPanel);
+		chapterPanel = Instantiate(UIPanels.Instance.chapterManagerPanel);
 		chapterPanel.transform.SetParent(Canvass.main.transform, false);
 	}
 

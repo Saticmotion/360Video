@@ -59,7 +59,7 @@ MonoBehaviour:
     type: 3}
   tagPanel: {fileID: 8492929646453990575, guid: d32f2958c4f214c48880afca02996939,
     type: 3}
-  chapterPanel: {fileID: 9167167837232050945, guid: ec855773e0470634a937f4fd4e94407e,
+  chapterManagerPanel: {fileID: 4787452447403405063, guid: ec855773e0470634a937f4fd4e94407e,
     type: 3}
   textPanel: {fileID: 114804670035395096, guid: 68aee9630d16f3847ae9673fad651082,
     type: 3}
@@ -92,4 +92,8 @@ MonoBehaviour:
   multipleChoiceImagePanel: {fileID: 8384481404466831820, guid: a025ec2401e35d74a802e9f8e827347b,
     type: 3}
   multipleChoiceImagePanelEditor: {fileID: 1342452400986974951, guid: e5c25242b6238e445b14e706a33cf53a,
+    type: 3}
+  chapterPanel: {fileID: 5985276827738939110, guid: 6406e2a48ac0f71468649e982af1e91a,
+    type: 3}
+  chapterPanelEditor: {fileID: 1164318646736671676, guid: 91edac93ed6371a419bcaf7df5650826,
     type: 3}

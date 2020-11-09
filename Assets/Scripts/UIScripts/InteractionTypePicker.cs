@@ -1,5 +1,19 @@
 ﻿using UnityEngine;
 
+public enum InteractionType
+{
+	None,
+	Text,
+	Image,
+	Video,
+	MultipleChoice,
+	Audio,
+	FindArea,
+	MultipleChoiceArea,
+	MultipleChoiceImage,
+	Chapter
+}
+
 public class InteractionTypePicker : MonoBehaviour
 {
 	public bool answered = false;
@@ -56,5 +70,13 @@ public class InteractionTypePicker : MonoBehaviour
 	{
 		answered = true;
 		answer = InteractionType.MultipleChoiceImage;
+	}
+
+	//TODO(Simon): Disable chapter option if no chapters defined. Also show message explaining why
+	public void AnswerChapter()
+	{
+		answered = true;
+		answer = InteractionType.Chapter;
+		Debug.LogError("TODO(Simon): Disable chapter option if no chapters defined. Also show message explaining why");
 	}
 }

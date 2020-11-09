@@ -25,6 +25,35 @@ public class ChapterManager : MonoBehaviour
 		Instance = this;
 	}
 
+	public Chapter GetChapterById(int id)
+	{
+		for (int i = 0; i < chapters.Count; i++)
+		{
+			if (chapters[i].id == id)
+			{
+				return chapters[i];
+			}
+		}
+
+		return null;
+	}
+
+	//NOTE(Simon): Filters titles only. Should maybe also filter on description?
+	public List<Chapter> Filter(string text)
+	{
+		var matches = new List<Chapter>();
+
+		for (int i = 0; i < chapters.Count; i++)
+		{
+			if (chapters[i].name.ToLowerInvariant().Contains(text.ToLowerInvariant()))
+			{
+				matches.Add(chapters[i]);
+			}
+		}
+
+		return matches;
+	}
+
 	public bool AddChapter(string name, string description)
 	{
 		bool error = false;
