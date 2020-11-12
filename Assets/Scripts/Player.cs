@@ -50,6 +50,7 @@ public class Player : MonoBehaviour
 	public GameObject findAreaPanelPrefab;
 	public GameObject multipleChoiceAreaPanelPrefab;
 	public GameObject multipleChoiceImagePanelPrefab;
+	public GameObject chapterPanelPrefab;
 	public GameObject cameraRig;
 	public GameObject projectorPrefab;
 
@@ -560,10 +561,18 @@ public class Player : MonoBehaviour
 					newInteractionPoint.panel = panel;
 					break;
 				}
+				case InteractionType.Chapter:
+				{
+					var panel = Instantiate(chapterPanelPrefab, Canvass.sphereUIPanelWrapper.transform);
+					int chapterId = Int32.Parse(newInteractionPoint.body);
+					panel.GetComponent<ChapterPanelSphere>().Init(newInteractionPoint.title, chapterId, this);
+					newInteractionPoint.panel = panel;
+					break;
+				}
 				default:
 				{
 					isValidPoint = false;
-					Debug.Log("Invalid interactionPoint encountered");
+					Debug.LogError("Invalid interactionPoint encountered");
 					break;
 				}
 			}

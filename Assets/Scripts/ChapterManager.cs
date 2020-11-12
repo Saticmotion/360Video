@@ -16,6 +16,8 @@ public class ChapterManager : MonoBehaviour
 	public static ChapterManager Instance { get; private set; }
 	public List<Chapter> chapters;
 
+	public VideoController controller;
+
 	//NOTE(Simon): Always explicitly start at 1
 	private int indexCounter = 1;
 
@@ -115,5 +117,15 @@ public class ChapterManager : MonoBehaviour
 				indexCounter = chapters[i].id;
 			}
 		}
+	}
+
+	public void GoToChapter(Chapter chapter)
+	{
+		if (controller == null)
+		{
+			controller = GameObject.Find("FileLoader").GetComponent<FileLoader>().controller;
+		}
+
+		controller.Seek(chapter.time);
 	}
 }

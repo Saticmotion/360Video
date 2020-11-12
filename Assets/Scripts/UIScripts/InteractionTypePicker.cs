@@ -11,6 +11,7 @@ public enum InteractionType
 	FindArea,
 	MultipleChoiceArea,
 	MultipleChoiceImage,
+	TabularData,
 	Chapter
 }
 
