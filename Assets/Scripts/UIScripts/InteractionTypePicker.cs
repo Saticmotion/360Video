@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public enum InteractionType
 {
@@ -20,9 +21,18 @@ public class InteractionTypePicker : MonoBehaviour
 	public bool answered = false;
 	public InteractionType answer;
 
+	public GameObject noChaptersWarning;
+	public Text chaptersText;
+	public Button chaptersButton;
+
 	public void OnEnable()
 	{
 		StartCoroutine(UIAnimation.FadeIn(GetComponent<RectTransform>(), GetComponent<CanvasGroup>()));
+
+		bool hasAnyChapters = ChapterManager.Instance.chapters.Count > 0;
+		noChaptersWarning.SetActive(!hasAnyChapters);
+		chaptersButton.interactable = hasAnyChapters;
+		chaptersText.alignment = hasAnyChapters ? TextAnchor.MiddleLeft : TextAnchor.UpperLeft;
 	}
 
 	public void AnswerImage()
@@ -78,6 +88,5 @@ public class InteractionTypePicker : MonoBehaviour
 	{
 		answered = true;
 		answer = InteractionType.Chapter;
-		Debug.LogError("TODO(Simon): Disable chapter option if no chapters defined. Also show message explaining why");
 	}
 }
