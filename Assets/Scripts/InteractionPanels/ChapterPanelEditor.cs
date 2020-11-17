@@ -21,7 +21,7 @@ public class ChapterPanelEditor : MonoBehaviour
 
 	private static Color errorColor = new Color(1, 0.8f, 0.8f, 1f);
 
-	public void Init(string newTitle = "", int newChapterId = -1)
+	public void Init(string newTitle, int newChapterId = -1)
 	{
 		if (newChapterId != -1)
 		{

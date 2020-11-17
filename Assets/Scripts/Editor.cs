@@ -219,14 +219,13 @@ public class Editor : MonoBehaviour
 		Instance = this;
 		//NOTE(Kristof): This needs to be called in awake so we're guaranteed it isn't in VR mode
 		UnityEngine.XR.XRSettings.enabled = false;
-		Screen.SetResolution(1600, 900, FullScreenMode.Windowed);
+		Screen.SetResolution(Screen.width - 50, Screen.height - 50, FullScreenMode.Windowed);
 	}
 
 	private void Start()
 	{
 		interactionPointTemp = Instantiate(interactionPointPrefab);
 		interactionPointTemp.name = "Temp InteractionPoint";
-
 
 		interactionPoints = new List<InteractionPointEditor>();
 		sortedInteractionPoints = new List<InteractionPointEditor>();
@@ -317,7 +316,7 @@ public class Editor : MonoBehaviour
 			}
 
 			if (!(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-				&& Input.GetKeyDown(KeyCode.Space))
+				&& Input.GetKeyDown(KeyCode.Space) && tagPanel == null && chapterPanel == null)
 			{
 				videoController.TogglePlay();
 			}
@@ -969,6 +968,22 @@ public class Editor : MonoBehaviour
 					}
 					break;
 				}
+				case InteractionType.Chapter:
+				{
+					var editor = interactionEditor.GetComponent<ChapterPanelEditor>();
+
+					if (editor.answered)
+					{
+						var panel = pointToEdit.panel.GetComponent<ChapterPanel>();
+						panel.Init(editor.answerTitle, editor.answerChapterId);
+						pointToEdit.title = editor.answerTitle;
+						pointToEdit.body = editor.answerChapterId.ToString();
+						pointToEdit.panel = panel.gameObject;
+
+						finished = true;
+					}
+					break;
+				}
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
@@ -1590,6 +1605,13 @@ public class Editor : MonoBehaviour
 						}
 						var correct = Int32.Parse(point.body);
 						interactionEditor.GetComponent<MultipleChoiceImagePanelEditor>().Init(point.title, fullPaths, correct);
+						break;
+					}
+					case InteractionType.Chapter:
+					{
+						interactionEditor = Instantiate(UIPanels.Instance.chapterPanelEditor, Canvass.main.transform).gameObject;
+						int chapterId = Int32.Parse(point.body);
+						interactionEditor.GetComponent<ChapterPanelEditor>().Init(point.title, chapterId);
 						break;
 					}
 					default:
@@ -2396,8 +2418,17 @@ public class Editor : MonoBehaviour
 					newInteractionPoint.panel = panel.gameObject;
 					break;
 				}
+				case InteractionType.Chapter:
+				{
+					var panel = Instantiate(UIPanels.Instance.chapterPanel, Canvass.main.transform);
+					var chapterId = Int32.Parse(newInteractionPoint.body);
+					panel.Init(newInteractionPoint.title, chapterId);
+					newInteractionPoint.panel = panel.gameObject;
+					break;
+				}
 				default:
 				{
+					Debug.LogError($"Forgot to implement OpenFile() branch for  {newInteractionPoint.type}");
 					isValidPoint = false;
 					break;
 				}
