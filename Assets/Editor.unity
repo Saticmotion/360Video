@@ -1675,6 +1675,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1802637137}
   - component: {fileID: 1802637136}
+  - component: {fileID: 1802637138}
   m_Layer: 5
   m_Name: Editor
   m_TagString: Untagged
@@ -1730,6 +1731,29 @@ RectTransform:
   m_AnchoredPosition: {x: 603, y: 339}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1802637138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1802637135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41bd6139843e0014ba850b4843c2e469, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 21300000, guid: 9067b484ad05f33408e00b460ae8a510, type: 3}
+  image: {fileID: 21300000, guid: ef5765fccf4576b43a64089b7fb5bf8f, type: 3}
+  video: {fileID: 21300000, guid: 3adda5a41ad68164eb471d2858e991f6, type: 3}
+  multipleChoice: {fileID: 21300000, guid: 7d1ee0b78b71050498a9075753af66fe, type: 3}
+  audio: {fileID: 21300000, guid: 034ee97e07d7e8645b8c38b97dc8cd59, type: 3}
+  findArea: {fileID: 21300000, guid: 7d5d386811bae494abb3e439ff98d9ed, type: 3}
+  multipleChoiceArea: {fileID: 21300000, guid: 7f2713b4ae53ca540b1e046befe84ee2, type: 3}
+  multipleChoiceImage: {fileID: 21300000, guid: d573217274a3d9542a574b5723d1a04e,
+    type: 3}
+  tabularData: {fileID: 0}
+  chapter: {fileID: 0}
 --- !u!1 &1915161241
 GameObject:
   m_ObjectHideFlags: 0

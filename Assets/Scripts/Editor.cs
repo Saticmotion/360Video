@@ -154,7 +154,6 @@ public class Editor : MonoBehaviour
 	public GameObject interactionPointPrefab;
 	private GameObject interactionPointTemp;
 	private List<InteractionPointEditor> interactionPoints;
-	private List<InteractionPointEditor> sortedInteractionPoints;
 	private InteractionPointEditor pointToMove;
 	private InteractionPointEditor pointToEdit;
 	private InteractionPointEditor lastPlacedPoint;
@@ -210,8 +209,6 @@ public class Editor : MonoBehaviour
 	private UploadStatus uploadStatus;
 	private Dictionary<string, InteractionPointEditor> allExtras = new Dictionary<string, InteractionPointEditor>();
 
-	private int interactionPointCount;
-
 
 	private void Awake()
 	{
@@ -228,7 +225,6 @@ public class Editor : MonoBehaviour
 		interactionPointTemp.name = "Temp InteractionPoint";
 
 		interactionPoints = new List<InteractionPointEditor>();
-		sortedInteractionPoints = new List<InteractionPointEditor>();
 
 		timeTooltip = Instantiate(timeTooltipPrefab, new Vector3(-1000, -1000), Quaternion.identity, Canvass.main.transform).GetComponent<TimeTooltip>();
 		timeTooltip.ResetPosition();
@@ -266,19 +262,10 @@ public class Editor : MonoBehaviour
 		mouseDelta = new Vector2(Input.mousePosition.x - prevMousePosition.x, Input.mousePosition.y - prevMousePosition.y);
 		prevMousePosition = Input.mousePosition;
 
-		//TODO(Simon): this is a hack to fix a bug. Sort sorts in place. So the sorted list got passed to all kinds of places where we need an unsorted list.
-		sortedInteractionPoints.Clear();
-		sortedInteractionPoints.AddRange(interactionPoints);
-		sortedInteractionPoints.Sort((x, y) => x.startTime != y.startTime
-			? x.startTime.CompareTo(y.startTime)
-			: x.endTime.CompareTo(y.endTime));
-		interactionPointCount = 0;
-
-		//NOTE(Simon): Reset InteractionPoint color. Yep this really is the best place to do this.
-		foreach (var point in sortedInteractionPoints)
+		//NOTE(Simon): Reset InteractionPoint color after a hover
+		foreach (var point in interactionPoints)
 		{
 			point.point.GetComponent<SpriteRenderer>().color = TagManager.Instance.GetTagColorById(point.tagId);
-			point.point.GetComponentInChildren<TextMesh>().text = (++interactionPointCount).ToString();
 		}
 
 		if (videoController.videoLoaded)
@@ -709,10 +696,12 @@ public class Editor : MonoBehaviour
 				lastPlacedPoint.tagId = interactionEditor.GetComponentInChildren<TagPicker>().currentTagId;
 				lastPlacedPoint.mandatory = interactionEditor.GetComponentInChildren<MandatoryPanel>().isMandatory;
 				lastPlacedPoint.timelineRow.mandatory.isOn = lastPlacedPoint.mandatory;
-				Destroy(interactionEditor);
-				editorState = EditorState.Active;
+				lastPlacedPoint.point.GetComponentInChildren<SpriteRenderer>().sprite = InteractionTypeSprites.GetSprite(lastPlacedPoint.type);
 				lastPlacedPoint.filled = true;
 				SetInteractionPointTag(lastPlacedPoint);
+
+				Destroy(interactionEditor);
+				editorState = EditorState.Active;
 				UnsavedChangesTracker.Instance.unsavedChanges = true;
 			}
 
@@ -2439,6 +2428,8 @@ public class Editor : MonoBehaviour
 				newInteractionPoint.panel.SetActive(false);
 				AddItemToTimeline(newInteractionPoint, true);
 				SetInteractionPointTag(newInteractionPoint);
+				var interactionTypeRenderer = newInteractionPoint.point.GetComponentInChildren<SpriteRenderer>(excludeSelf: true);
+				interactionTypeRenderer.sprite = InteractionTypeSprites.GetSprite(newInteractionPoint.type);
 			}
 			else
 			{
@@ -2481,12 +2472,12 @@ public class Editor : MonoBehaviour
 	private void SetInteractionPointTag(InteractionPointEditor point)
 	{
 		var shape = point.point.GetComponent<SpriteRenderer>();
-		var text = point.point.GetComponentInChildren<TextMesh>();
+		var interactionTypeRenderer = point.point.GetComponentInChildren<SpriteRenderer>(excludeSelf: true);
 		var tag = TagManager.Instance.GetTagById(point.tagId);
 
 		shape.sprite = TagManager.Instance.ShapeForIndex(tag.shapeIndex);
 		shape.color = tag.color;
-		text.color = tag.color.IdealTextColor();
+		interactionTypeRenderer.color = tag.color.IdealTextColor();
 	}
 
 	private IEnumerator UploadFile()

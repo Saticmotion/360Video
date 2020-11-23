@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public static class MathHelper
@@ -188,5 +189,23 @@ public static class ExplorerHelper
 #if UNITY_STANDALONE_LINUX
 		Process.Start("xdg-open", path);
 #endif
+	}
+}
+
+public static class GameObjectHelper
+{
+	public static T GetComponentInChildren<T>(this GameObject go, bool excludeSelf)
+	{
+		if (excludeSelf)
+		{
+			var components = new HashSet<T>(go.GetComponentsInChildren<T>());
+			var componentInSelf = go.GetComponent<T>();
+			components.Remove(componentInSelf);
+			return components.ToArray()[0];
+		}
+		else
+		{
+			return go.GetComponentInChildren<T>();
+		}
 	}
 }
