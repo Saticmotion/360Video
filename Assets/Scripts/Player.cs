@@ -3,12 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.XR;
 using Valve.VR;
-using Object = UnityEngine.Object;
 
 public enum PlayerState
 {
@@ -293,13 +291,15 @@ public class Player : MonoBehaviour
 
 			//NOTE(Simon): Handle mandatory interactionPoints
 			{
-				double timeToNextPause = Double.MaxValue; 
-				//NOTE(Simon): Find the next unseen mandatory interaction
-				for (int i = 0; i < mandatoryInteractionPoints.Count; i++)
+				double timeToNextPause = Double.MaxValue;
+				var interactionsInChapter = MandatoryInteractionsForTime(videoController.currentTime);
+
+				//NOTE(Simon): Find the next unseen mandatory interaction in this chapter
+				for (int i = 0; i < interactionsInChapter.Count; i++)
 				{
-					if (!mandatoryInteractionPoints[i].isSeen && mandatoryInteractionPoints[i].endTime > videoController.currentTime)
+					if (!interactionsInChapter[i].isSeen && interactionsInChapter[i].endTime > videoController.currentTime)
 					{
-						timeToNextPause = mandatoryInteractionPoints[i].endTime - videoController.currentTime;
+						timeToNextPause = interactionsInChapter[i].endTime - videoController.currentTime;
 						break;
 					}
 				}
@@ -698,18 +698,54 @@ public class Player : MonoBehaviour
 
 	public void OnSeek(double time)
 	{
-		var desiredTime = time;
-		//NOTE(Simon): Find the first unseen mandatory interaction, and set desiredTime to its endTime if we have seeked beyond that endTime
-		for (int i = 0; i < mandatoryInteractionPoints.Count; i++)
+		dgfdgsgfdsjkjgdsknkjlndsfg
+			//TODO(Simon): Somehow seeking to the same time multiple times will still go beyond mandatory interactions
+		double desiredTime = time;
+		var interactionsInChapter = MandatoryInteractionsForTime(desiredTime);
+
+		//NOTE(Simon): Find the first unseen mandatory interaction in this chapter, and set desiredTime to its endTime if we have seeked beyond that endTime
+		for (int i = 0; i < interactionsInChapter.Count; i++)
 		{
-			if (!mandatoryInteractionPoints[i].isSeen && mandatoryInteractionPoints[i].endTime < desiredTime)
+			if (!interactionsInChapter[i].isSeen && interactionsInChapter[i].endTime < desiredTime)
 			{
-				desiredTime = mandatoryInteractionPoints[i].endTime - 0.1;
+				desiredTime = interactionsInChapter[i].endTime - 0.1;
 				break;
 			}
 		}
 
 		videoController.SeekNoTriggers(desiredTime);
+	}
+
+	//NOTE(Simon): This filter returns all mandatory interactions in this chapter
+	public List<InteractionPointPlayer> MandatoryInteractionsForTime(double desiredTime)
+	{
+		var interactionsInChapter = new List<InteractionPointPlayer>();
+		if (mandatoryInteractionPoints.Count == 0)
+		{
+			return interactionsInChapter;
+		}
+
+		float nextChapterTime = ChapterManager.Instance.NextChapterTime(desiredTime);
+		float currentChapterTime = ChapterManager.Instance.CurrentChapterTime(desiredTime);
+
+		for (int i = 0; i < mandatoryInteractionPoints.Count; i++)
+		{
+			//NOTE(Simon): Ignore interactions before this chapter
+			if (mandatoryInteractionPoints[i].endTime < currentChapterTime)
+			{
+				continue;
+			}
+
+			//NOTE(Simon): Ignore interactions after this chapter
+			if (mandatoryInteractionPoints[i].endTime > nextChapterTime)
+			{
+				break;
+			}
+
+			interactionsInChapter.Add(mandatoryInteractionPoints[i]);
+		}
+
+		return interactionsInChapter;
 	}
 
 	public void OnVideoBrowserHologramUp()

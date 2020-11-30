@@ -88,6 +88,7 @@ public class ChapterManager : MonoBehaviour
 		});
 
 		UnsavedChangesTracker.Instance.unsavedChanges = true;
+		SortChaptersChronologically();
 
 		return true;
 	}
@@ -117,6 +118,8 @@ public class ChapterManager : MonoBehaviour
 				indexCounter = chapters[i].id;
 			}
 		}
+
+		SortChaptersChronologically();
 	}
 
 	public void GoToChapter(Chapter chapter)
@@ -127,5 +130,44 @@ public class ChapterManager : MonoBehaviour
 		}
 
 		controller.Seek(chapter.time);
+	}
+
+	private void SortChaptersChronologically()
+	{
+		chapters.Sort((x, y) => x.time.CompareTo(y.time));
+	}
+
+	public float NextChapterTime(double time)
+	{
+		//NOTE(Simon): Find smallest chapter time larger than input. (i.e. beginning of next chapter)
+		for (int i = 0; i < chapters.Count; i++)
+		{
+			if (chapters[i].time > time)
+			{
+				return chapters[i].time;
+			}
+		}
+
+		return Single.PositiveInfinity;
+	}
+
+	public float CurrentChapterTime(double time)
+	{
+		float largestTime = 0;
+		//NOTE(Simon): Find largest chapter time smaller than or equal to input. (i.e. beginning of current chapter)
+		for (int i = 0; i < chapters.Count; i++)
+		{
+			if (chapters[i].time <= time)
+			{
+				largestTime = chapters[i].time;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		//NOTE(Simon): Zero represents a "virtual" chapter at the beginning of the video. Useful if no chapter was defined at the beginning.
+		return largestTime;
 	}
 }
