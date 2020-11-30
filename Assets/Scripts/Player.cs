@@ -654,9 +654,9 @@ public class Player : MonoBehaviour
 		point.point.transform.LookAt(Vector3.zero, Vector3.up);
 		point.point.transform.RotateAround(point.point.transform.position, point.point.transform.up, 180);
 
-		//NOTE(Simon): Add a number to interaction points
+		//NOTE(Simon): Add a sprite to interaction points, indicating InteractionType
+		point.point.GetComponentInChildren<SpriteRenderer>(excludeSelf: true).sprite = InteractionTypeSprites.GetSprite(point.type);
 		point.point.transform.GetChild(0).gameObject.SetActive(true);
-		point.point.GetComponentInChildren<TextMesh>().text = (++interactionPointCount).ToString();
 		point.panel.SetActive(false);
 		interactionPoints.Add(point);
 
@@ -666,12 +666,12 @@ public class Player : MonoBehaviour
 	private void SetInteractionPointTag(InteractionPointPlayer point)
 	{
 		var shape = point.point.GetComponent<SpriteRenderer>();
-		var text = point.point.GetComponentInChildren<TextMesh>();
+		var interactionTypeRenderer = point.point.GetComponentInChildren<SpriteRenderer>(excludeSelf: true);
 		var tag = TagManager.Instance.GetTagById(point.tagId);
 
 		shape.sprite = TagManager.Instance.ShapeForIndex(tag.shapeIndex);
 		shape.color = tag.color;
-		text.color = tag.color.IdealTextColor();
+		interactionTypeRenderer.color = tag.color.IdealTextColor();
 	}
 
 	private void RemoveInteractionPoint(InteractionPointPlayer point)

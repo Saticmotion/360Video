@@ -696,7 +696,7 @@ public class Editor : MonoBehaviour
 				lastPlacedPoint.tagId = interactionEditor.GetComponentInChildren<TagPicker>().currentTagId;
 				lastPlacedPoint.mandatory = interactionEditor.GetComponentInChildren<MandatoryPanel>().isMandatory;
 				lastPlacedPoint.timelineRow.mandatory.isOn = lastPlacedPoint.mandatory;
-				lastPlacedPoint.point.GetComponentInChildren<SpriteRenderer>().sprite = InteractionTypeSprites.GetSprite(lastPlacedPoint.type);
+				lastPlacedPoint.point.GetComponentInChildren<SpriteRenderer>(excludeSelf: true).sprite = InteractionTypeSprites.GetSprite(lastPlacedPoint.type);
 				lastPlacedPoint.filled = true;
 				SetInteractionPointTag(lastPlacedPoint);
 

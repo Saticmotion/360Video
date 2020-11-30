@@ -42,7 +42,6 @@ public class InteractionTypeSprites : MonoBehaviour
 		sprites.Add(InteractionType.TabularData, tabularData);
 		sprites.Add(InteractionType.Chapter, chapter);
 
-
 		Assert.IsTrue(sprites.Count == Enum.GetValues(typeof(InteractionType)).Length, "You forgot to add the interaction sprite here");
 	}
 
