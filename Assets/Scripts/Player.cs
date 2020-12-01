@@ -696,10 +696,8 @@ public class Player : MonoBehaviour
 		seekbarCollider.enabled = active;
 	}
 
-	public void OnSeek(double time)
+	public float OnSeek(double time)
 	{
-		dgfdgsgfdsjkjgdsknkjlndsfg
-			//TODO(Simon): Somehow seeking to the same time multiple times will still go beyond mandatory interactions
 		double desiredTime = time;
 		var interactionsInChapter = MandatoryInteractionsForTime(desiredTime);
 
@@ -713,7 +711,7 @@ public class Player : MonoBehaviour
 			}
 		}
 
-		videoController.SeekNoTriggers(desiredTime);
+		return (float)desiredTime;
 	}
 
 	//NOTE(Simon): This filter returns all mandatory interactions in this chapter
