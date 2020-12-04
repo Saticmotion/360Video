@@ -40,6 +40,7 @@ public class Player : MonoBehaviour
 
 	public GameObject interactionPointPrefab;
 	public GameObject indexPanelPrefab;
+	public GameObject chapterSelectorPrefab;
 	public GameObject imagePanelPrefab;
 	public GameObject textPanelPrefab;
 	public GameObject videoPanelPrefab;
@@ -65,6 +66,7 @@ public class Player : MonoBehaviour
 	private FileLoader fileLoader;
 	private VideoController videoController;
 	private List<GameObject> videoList;
+	private ChapterSelectorPanel chapterSelector;
 	
 	private GameObject indexPanel;
 	private Transform videoCanvas;
@@ -346,6 +348,8 @@ public class Player : MonoBehaviour
 					playerState = PlayerState.Watching;
 					Canvass.modalBackground.SetActive(false);
 					SetCanvasesActive(true);
+					chapterSelector = Instantiate(chapterSelectorPrefab, Canvass.main.transform, false).GetComponent<ChapterSelectorPanel>();
+
 					if (VRDevices.loadedSdk > VRDevices.LoadedSdk.None)
 					{
 						StartCoroutine(FadevideoCanvasOut(videoCanvas));
@@ -779,6 +783,8 @@ public class Player : MonoBehaviour
 		SetCanvasesActive(false);
 		EventManager.OnSpace();
 		Seekbar.ClearBlips();
+		Destroy(chapterSelector);
+
 		projector.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
 
 		videoController.Pause();
@@ -792,6 +798,7 @@ public class Player : MonoBehaviour
 		{
 			RemoveInteractionPoint(interactionPoints[j]);
 		}
+
 		interactionPoints.Clear();
 		mandatoryInteractionPoints.Clear();
 		interactionPointCount = 0;
