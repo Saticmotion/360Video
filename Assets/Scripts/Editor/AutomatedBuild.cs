@@ -2,6 +2,7 @@ using UnityEditor;
 using System.Diagnostics;
 using System.IO;
 using UnityEngine;
+using System.Linq;
 
 public class AutomatedBuild : EditorWindow
 {
@@ -128,7 +129,7 @@ public class BuildSettingsWindow : EditorWindow
 	private bool official = false;
 	private string oldVersion = "1.0";
 	private string newVersion = "";
-
+	private string[] existingTags;
 
 	[MenuItem("Example/Simple Recorder")]
 	public void Init()
@@ -141,9 +142,8 @@ public class BuildSettingsWindow : EditorWindow
 
 		GetWindow<BuildSettingsWindow>().position = new Rect(x, y, width, height);
 
-		oldVersion = Application.version.ToString();
-
-		//TODO(Jitse): Get current file version
+		oldVersion = GetLatestBuildVersion();
+		existingTags = GetExistingTags();
 	}
 
 	void OnGUI()
@@ -153,15 +153,13 @@ public class BuildSettingsWindow : EditorWindow
 		EditorGUILayout.Space();
 		if (GUILayout.Button("Build"))
 		{
-			if (oldVersion.Equals(newVersion))
-			{
-			}
-			else
+			//NOTE(Jitse): If the build version tag doesn't exist yet, start building and create the new tag
+			if (!existingTags.Contains(newVersion))
 			{
 			}
 		}
 
-		if (oldVersion.Equals(newVersion))
+		if (existingTags.Contains(newVersion))
 		{
 			EditorGUILayout.LabelField("Please choose a new version.");
 		}
@@ -170,4 +168,87 @@ public class BuildSettingsWindow : EditorWindow
 			EditorGUILayout.LabelField("");
 		}
 	}
+
+	public static string GetLatestBuildVersion()
+	{
+		var proc = new Process
+		{
+			StartInfo = new ProcessStartInfo
+			{
+				FileName = "git",
+				Arguments = "rev-list --tags --max-count=1",
+				RedirectStandardOutput = true,
+				UseShellExecute = false
+			}
+		};
+		proc.Start();
+		string commitId = proc.StandardOutput.ReadToEnd().Trim('\n');
+
+		proc = new Process
+		{
+			StartInfo = new ProcessStartInfo
+			{
+				FileName = "git",
+				Arguments = $"describe --tags {commitId}",
+				RedirectStandardOutput = true,
+				UseShellExecute = false
+			}
+		};
+		proc.Start();
+		string version = proc.StandardOutput.ReadToEnd().Trim('\n');
+
+		//NOTE(Jitse): Remove any prefixes and affixes
+		return FormatVersionNumber(ref version);
+	}
+
+	private static string FormatVersionNumber(ref string version)
+	{
+		bool isNumber = int.TryParse(version[0].ToString(), out _);
+		while (!isNumber)
+		{
+			version = version.Substring(1);
+			isNumber = int.TryParse(version[0].ToString(), out _);
+		}
+
+		bool isNumberOrDot;
+		for (int i = 0; i < version.Length; i++)
+		{
+			isNumberOrDot = int.TryParse(version[i].ToString(), out _) || version[i].Equals('.');
+			if (!isNumberOrDot)
+			{
+				version = version.Substring(0, i);
+				break;
+			}
+		}
+
+		return version;
+	}
+
+	public static string[] GetExistingTags()
+	{
+		var proc = new Process
+		{
+			StartInfo = new ProcessStartInfo
+			{
+				FileName = "git",
+				Arguments = "tag",
+				RedirectStandardOutput = true,
+				UseShellExecute = false
+			}
+		};
+		proc.Start();
+		string[] tags = proc.StandardOutput.ReadToEnd().Split('\n');
+
+		for (int i = 0; i < tags.Length; i++)
+		{
+			string tag = tags[i];
+			if (!string.IsNullOrEmpty(tag))
+			{
+				tags[i] = FormatVersionNumber(ref tag);
+			}
+		}
+
+		return tags;
+	}
+
 }
