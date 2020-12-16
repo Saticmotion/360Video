@@ -10,84 +10,84 @@ public class AutomatedBuild : EditorWindow
 	public static void BuildWin64()
 	{
 		BuildSettingsWindow buildSettings = new BuildSettingsWindow();
-		buildSettings.Init();
+		buildSettings.Init("Win64");
 		buildSettings.Show();
-
-		if (buildSettings.success)
-		{
-			string branch = GetBranch();
-			BuildPlayerOptions options;
-
-			string path = "builds/" + branch + "/EditorWin/";
-			options = new BuildPlayerOptions
-			{
-				scenes = new[] { "Assets/Editor.unity" },
-				locationPathName = path + "VivistaEditor.exe",
-				target = BuildTarget.StandaloneWindows64,
-				options = 0
-			};
-			PlayerSettings.virtualRealitySupported = false;
-			PlayerSettings.fullScreenMode = UnityEngine.FullScreenMode.Windowed;
-			PlayerSettings.defaultIsNativeResolution = true;
-			PlayerSettings.usePlayerLog = true;
-			PlayerSettings.resizableWindow = true;
-			BuildPipeline.BuildPlayer(options);
-
-			path = "builds/" + branch + "/PlayerWin/";
-			options = new BuildPlayerOptions
-			{
-				scenes = new[] { "Assets/Player.unity" },
-				locationPathName = path + "VivistaPlayer.exe",
-				target = BuildTarget.StandaloneWindows64,
-				options = 0
-			};
-			PlayerSettings.virtualRealitySupported = true;
-			BuildPipeline.BuildPlayer(options);
-
-			ShowInWindowsExplorer("builds/" + branch);
-		}
 	}
 
 	[MenuItem("Build/OSX")]
 	static void BuildOSX()
 	{
 		BuildSettingsWindow buildSettings = new BuildSettingsWindow();
-		buildSettings.Init();
+		buildSettings.Init("OSX");
 		buildSettings.Show();
+	}
 
-		if (buildSettings.success)
+	public static void StartBuildOSX()
+	{
+		string branch = GetBranch();
+		BuildPlayerOptions options;
+
+		string path = "builds/" + branch + "/EditorOSX/";
+		options = new BuildPlayerOptions
 		{
-			string branch = GetBranch();
-			BuildPlayerOptions options;
+			scenes = new[] { "Assets/Editor.unity" },
+			locationPathName = path + "VivistaEditor.exe",
+			target = BuildTarget.StandaloneOSX,
+			options = 0
+		};
+		PlayerSettings.virtualRealitySupported = false;
+		PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
+		PlayerSettings.defaultIsNativeResolution = true;
+		PlayerSettings.usePlayerLog = true;
+		PlayerSettings.resizableWindow = true;
+		BuildPipeline.BuildPlayer(options);
 
-			string path = "builds/" + branch + "/EditorOSX/";
-			options = new BuildPlayerOptions
-			{
-				scenes = new[] { "Assets/Editor.unity" },
-				locationPathName = path + "VivistaEditor.exe",
-				target = BuildTarget.StandaloneOSX,
-				options = 0
-			};
-			PlayerSettings.virtualRealitySupported = false;
-			PlayerSettings.fullScreenMode = UnityEngine.FullScreenMode.Windowed;
-			PlayerSettings.defaultIsNativeResolution = true;
-			PlayerSettings.usePlayerLog = true;
-			PlayerSettings.resizableWindow = true;
-			BuildPipeline.BuildPlayer(options);
+		path = "builds/" + branch + "/PlayerOSX/";
+		options = new BuildPlayerOptions
+		{
+			scenes = new[] { "Assets/Player.unity" },
+			locationPathName = path + "VivistaPlayer.exe",
+			target = BuildTarget.StandaloneOSX,
+			options = 0
+		};
+		PlayerSettings.virtualRealitySupported = false;
+		BuildPipeline.BuildPlayer(options);
 
-			path = "builds/" + branch + "/PlayerOSX/";
-			options = new BuildPlayerOptions
-			{
-				scenes = new[] { "Assets/Player.unity" },
-				locationPathName = path + "VivistaPlayer.exe",
-				target = BuildTarget.StandaloneOSX,
-				options = 0
-			};
-			PlayerSettings.virtualRealitySupported = false;
-			BuildPipeline.BuildPlayer(options);
+		ShowInWindowsExplorer("builds/" + branch);
+	}
 
-			ShowInWindowsExplorer("builds/" + branch);
-		}
+	public static void StartBuildWin64()
+	{
+		string branch = GetBranch();
+		BuildPlayerOptions options;
+
+		string path = "builds/" + branch + "/EditorWin/";
+		options = new BuildPlayerOptions
+		{
+			scenes = new[] { "Assets/Editor.unity" },
+			locationPathName = path + "VivistaEditor.exe",
+			target = BuildTarget.StandaloneWindows64,
+			options = 0
+		};
+		PlayerSettings.virtualRealitySupported = false;
+		PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
+		PlayerSettings.defaultIsNativeResolution = true;
+		PlayerSettings.usePlayerLog = true;
+		PlayerSettings.resizableWindow = true;
+		BuildPipeline.BuildPlayer(options);
+
+		path = "builds/" + branch + "/PlayerWin/";
+		options = new BuildPlayerOptions
+		{
+			scenes = new[] { "Assets/Player.unity" },
+			locationPathName = path + "VivistaPlayer.exe",
+			target = BuildTarget.StandaloneWindows64,
+			options = 0
+		};
+		PlayerSettings.virtualRealitySupported = true;
+		BuildPipeline.BuildPlayer(options);
+
+		ShowInWindowsExplorer("builds/" + branch);
 	}
 
 	public static string GetBranch()
@@ -124,16 +124,17 @@ public class AutomatedBuild : EditorWindow
 
 public class BuildSettingsWindow : EditorWindow
 {
-	public bool success = false;
-	
 	private bool official = false;
+	private string operatingSystem;
 	private string oldVersion = "1.0";
 	private string newVersion = "";
 	private string[] existingTags;
 
 	[MenuItem("Example/Simple Recorder")]
-	public void Init()
+	public void Init(string operatingSystem)
 	{
+		this.operatingSystem = operatingSystem;
+
 		const int width = 400;
 		const int height = 100;
 
@@ -156,6 +157,31 @@ public class BuildSettingsWindow : EditorWindow
 			//NOTE(Jitse): If the build version tag doesn't exist yet, start building and create the new tag
 			if (!existingTags.Contains(newVersion))
 			{
+				var proc = new Process
+				{
+					StartInfo = new ProcessStartInfo
+					{
+						FileName = "git",
+						Arguments = $"tag v{newVersion}",
+						RedirectStandardOutput = true,
+						UseShellExecute = false
+					}
+				};
+				UnityEngine.Debug.Log(proc.StartInfo.Arguments);
+				//NOTE(Jitse): Uncomment this to enable tag creation functionality
+				//proc.Start();
+
+				switch (operatingSystem)
+				{
+					case "Win64":
+						AutomatedBuild.StartBuildWin64();
+						break;
+					case "OSX":
+						AutomatedBuild.StartBuildOSX();
+						break;
+				}
+
+				Close();
 			}
 		}
 
