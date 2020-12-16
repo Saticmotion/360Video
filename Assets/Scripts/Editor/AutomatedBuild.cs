@@ -127,7 +127,8 @@ public class BuildSettingsWindow : EditorWindow
 	
 	private bool official = false;
 	private string oldVersion = "1.0";
-	private string newVersion = "0.0";
+	private string newVersion = "";
+
 
 	[MenuItem("Example/Simple Recorder")]
 	public void Init()
@@ -140,24 +141,23 @@ public class BuildSettingsWindow : EditorWindow
 
 		GetWindow<BuildSettingsWindow>().position = new Rect(x, y, width, height);
 
+		oldVersion = Application.version.ToString();
+
 		//TODO(Jitse): Get current file version
 	}
 
 	void OnGUI()
 	{
 		official = EditorGUILayout.Toggle("Official build", official);
-		newVersion = EditorGUILayout.TextField("File version", newVersion);
-
+		newVersion = EditorGUILayout.TextField("File version", newVersion == string.Empty ? oldVersion : newVersion);
 		EditorGUILayout.Space();
 		if (GUILayout.Button("Build"))
 		{
 			if (oldVersion.Equals(newVersion))
 			{
-				EditorGUILayout.LabelField("Please choose a new version.");
 			}
 			else
 			{
-
 			}
 		}
 
