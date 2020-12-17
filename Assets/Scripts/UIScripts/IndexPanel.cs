@@ -63,6 +63,7 @@ public class IndexPanel : MonoBehaviour
 	public Button nextPage;
 	public Image spinner;
 	public Text noVideos;
+	public Text versionNumber;
 	public GameObject serverConnectionError;
 	public GameObject filters;
 
@@ -116,6 +117,9 @@ public class IndexPanel : MonoBehaviour
 
 			searchAge.options.Add(new Dropdown.OptionData { text = cleanName.ToString(), image = null });
 		}
+
+		//NOTE(Jitse): Get the version number from a file and display it
+		versionNumber.text = File.ReadAllText(@"ProjectSettings\BuildVersion.asset");
 
 		page = 1;
 	}
