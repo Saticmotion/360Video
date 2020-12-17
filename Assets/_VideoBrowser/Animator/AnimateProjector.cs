@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class AnimateProjector : MonoBehaviour
 {
@@ -13,6 +15,7 @@ public class AnimateProjector : MonoBehaviour
 	public Player player;
 	public GameObject previousPage;
 	public GameObject nextPage;
+	public Text versionNumber;
 
 	public ParticleSystem[] part;
 
@@ -35,6 +38,9 @@ public class AnimateProjector : MonoBehaviour
 		{
 			t.Stop();
 		}
+
+		//NOTE(Jitse): Get the version number from a file and display it
+		versionNumber.text = File.ReadAllText(@"ProjectSettings\BuildVersion.asset");
 	}
 
 	public void MenuAnimation()
