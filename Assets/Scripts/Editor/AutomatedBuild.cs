@@ -135,7 +135,7 @@ public class BuildSettingsWindow : EditorWindow
 		this.operatingSystem = operatingSystem;
 
 		const int width = 450;
-		const int height = 140;
+		const int height = 150;
 
 		var x = (Screen.currentResolution.width - width) / 2;
 		var y = (Screen.currentResolution.height - height) / 3;
@@ -157,54 +157,56 @@ public class BuildSettingsWindow : EditorWindow
 		official = EditorGUILayout.Toggle("Official build", official);
 		EditorGUILayout.LabelField("Warning: this will create a new git tag.");
 		EditorGUILayout.EndHorizontal();
-		beta = EditorGUILayout.Toggle("Beta", beta);
 
-		EditorGUILayout.Space();
+		if (official)
+		{
+			beta = EditorGUILayout.Toggle("Beta", beta);
 
-		EditorGUILayout.LabelField($"Current version\t\t   {oldVersion}");
-		newVersion = EditorGUILayout.TextField("New version", newVersion);
+			EditorGUILayout.Space();
+
+			EditorGUILayout.LabelField($"Current version\t\t   {oldVersion}");
+			newVersion = EditorGUILayout.TextField("New version", newVersion);
+
+			EditorGUILayout.Space();
+		}
 
 		if (GUILayout.Button("Build"))
 		{
-			//NOTE(Jitse): If the build version tag doesn't exist yet, start building and create the new tag
-			if (!existingTags.Contains(newVersion))
+			//NOTE(Jitse): Only official builds require a new tag to be made
+			if (official)
 			{
-				string args = $"tag v{newVersion}";
-				if (beta)
+				//NOTE(Jitse): If the build version tag doesn't exist yet, create the new tag and start building
+				if (!existingTags.Contains(newVersion))
 				{
-					args = args + "-beta";
-				}
-				var proc = new Process
-				{
-					StartInfo = new ProcessStartInfo
+					string args = $"tag v{newVersion}";
+					if (beta)
 					{
-						FileName = "git",
-						Arguments = args,
-						RedirectStandardOutput = true,
-						UseShellExecute = false
+						args = args + "-beta";
 					}
-				};
-				UnityEngine.Debug.Log(proc.StartInfo.Arguments);
-				if (official)
-				{
+					var proc = new Process
+					{
+						StartInfo = new ProcessStartInfo
+						{
+							FileName = "git",
+							Arguments = args,
+							RedirectStandardOutput = true,
+							UseShellExecute = false
+						}
+					};
 					proc.Start();
-				}
 
-				switch (operatingSystem)
-				{
-					case "Win64":
-						AutomatedBuild.StartBuildWin64();
-						break;
-					case "OSX":
-						AutomatedBuild.StartBuildOSX();
-						break;
-				}
+					File.WriteAllText(@"ProjectSettings\BuildVersion.asset", newVersion);
 
-				Close();
+					StartBuild();
+				}
+			}
+			else
+			{
+				StartBuild();
 			}
 		}
 
-		if (existingTags.Contains(newVersion))
+		if (existingTags.Contains(newVersion) && official)
 		{
 			EditorGUILayout.LabelField("Please choose a new version.");
 		}
@@ -212,6 +214,21 @@ public class BuildSettingsWindow : EditorWindow
 		{
 			EditorGUILayout.LabelField("");
 		}
+	}
+
+	private void StartBuild()
+	{
+		switch (operatingSystem)
+		{
+			case "Win64":
+				AutomatedBuild.StartBuildWin64();
+				break;
+			case "OSX":
+				AutomatedBuild.StartBuildOSX();
+				break;
+		}
+
+		Close();
 	}
 
 	public static string GetLatestBuildVersion()
