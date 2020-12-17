@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,6 +7,7 @@ public class MenuBar : MonoBehaviour
 {
 	public List<Button> menuBarItems;
 	public List<GameObject> menuBarPanels;
+	public Text versionText;
 
 	public void Start()
 	{
@@ -18,6 +20,9 @@ public class MenuBar : MonoBehaviour
 
 			menuBarPanels[i].SetActive(false);
 		}
+
+		//NOTE(Jitse): Get the version number from a file and display it
+		versionText.text = File.ReadAllText(@"ProjectSettings\BuildVersion.asset");
 	}
 
 	void OnMenuBarItemClick(int index)
