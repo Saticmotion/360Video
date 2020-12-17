@@ -11,7 +11,6 @@ public class AutomatedBuild : EditorWindow
 	{
 		BuildSettingsWindow buildSettings = new BuildSettingsWindow();
 		buildSettings.Init("Win64");
-		buildSettings.Show();
 	}
 
 	[MenuItem("Build/OSX")]
@@ -19,7 +18,6 @@ public class AutomatedBuild : EditorWindow
 	{
 		BuildSettingsWindow buildSettings = new BuildSettingsWindow();
 		buildSettings.Init("OSX");
-		buildSettings.Show();
 	}
 
 	public static void StartBuildOSX()
@@ -125,23 +123,29 @@ public class AutomatedBuild : EditorWindow
 public class BuildSettingsWindow : EditorWindow
 {
 	private bool official = false;
+	private bool beta = false;
 	private string operatingSystem;
 	private string oldVersion = "1.0";
 	private string newVersion = "";
 	private string[] existingTags;
 
-	[MenuItem("Example/Simple Recorder")]
+	[MenuItem("Build Settings")]
 	public void Init(string operatingSystem)
 	{
 		this.operatingSystem = operatingSystem;
 
-		const int width = 400;
-		const int height = 100;
+		const int width = 450;
+		const int height = 140;
 
 		var x = (Screen.currentResolution.width - width) / 2;
-		var y = (Screen.currentResolution.height - height) / 3f;
+		var y = (Screen.currentResolution.height - height) / 3;
 
-		GetWindow<BuildSettingsWindow>().position = new Rect(x, y, width, height);
+		EditorWindow window = GetWindow<BuildSettingsWindow>(title:"Build Settings");
+		window.position = new Rect(x, y, width, height);
+		GUIContent title = new GUIContent();
+		title.text = "Build Settings";
+		window.titleContent = title;
+		window.Show();
 
 		oldVersion = GetLatestBuildVersion();
 		existingTags = GetExistingTags();
@@ -149,27 +153,42 @@ public class BuildSettingsWindow : EditorWindow
 
 	void OnGUI()
 	{
+		EditorGUILayout.BeginHorizontal();
 		official = EditorGUILayout.Toggle("Official build", official);
-		newVersion = EditorGUILayout.TextField("File version", newVersion == string.Empty ? oldVersion : newVersion);
+		EditorGUILayout.LabelField("Warning: this will create a new git tag.");
+		EditorGUILayout.EndHorizontal();
+		beta = EditorGUILayout.Toggle("Beta", beta);
+
 		EditorGUILayout.Space();
+
+		EditorGUILayout.LabelField($"Current version\t\t   {oldVersion}");
+		newVersion = EditorGUILayout.TextField("New version", newVersion);
+
 		if (GUILayout.Button("Build"))
 		{
 			//NOTE(Jitse): If the build version tag doesn't exist yet, start building and create the new tag
 			if (!existingTags.Contains(newVersion))
 			{
+				string args = $"tag v{newVersion}";
+				if (beta)
+				{
+					args = args + "-beta";
+				}
 				var proc = new Process
 				{
 					StartInfo = new ProcessStartInfo
 					{
 						FileName = "git",
-						Arguments = $"tag v{newVersion}",
+						Arguments = args,
 						RedirectStandardOutput = true,
 						UseShellExecute = false
 					}
 				};
 				UnityEngine.Debug.Log(proc.StartInfo.Arguments);
-				//NOTE(Jitse): Uncomment this to enable tag creation functionality
-				//proc.Start();
+				if (official)
+				{
+					proc.Start();
+				}
 
 				switch (operatingSystem)
 				{
@@ -276,5 +295,4 @@ public class BuildSettingsWindow : EditorWindow
 
 		return tags;
 	}
-
 }
