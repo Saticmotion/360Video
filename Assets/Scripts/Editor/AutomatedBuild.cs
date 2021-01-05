@@ -10,14 +10,14 @@ public class AutomatedBuild : EditorWindow
 	public static void BuildWin64()
 	{
 		BuildSettingsWindow buildSettings = new BuildSettingsWindow();
-		buildSettings.Init("Win64");
+		buildSettings.Init(OS.Win64);
 	}
 
 	[MenuItem("Build/OSX")]
-	static void BuildOSX()
+	public static void BuildOSX()
 	{
 		BuildSettingsWindow buildSettings = new BuildSettingsWindow();
-		buildSettings.Init("OSX");
+		buildSettings.Init(OS.OSX);
 	}
 
 	public static void StartBuildOSX()
@@ -124,13 +124,13 @@ public class BuildSettingsWindow : EditorWindow
 {
 	private bool official = false;
 	private bool beta = false;
-	private string operatingSystem;
+	private OS operatingSystem;
 	private string oldVersion = "1.0";
 	private string newVersion = "";
 	private string[] existingTags;
 
 	[MenuItem("Build Settings")]
-	public void Init(string operatingSystem)
+	public void Init(OS operatingSystem)
 	{
 		this.operatingSystem = operatingSystem;
 
@@ -195,7 +195,7 @@ public class BuildSettingsWindow : EditorWindow
 					};
 					proc.Start();
 
-					File.WriteAllText(@"ProjectSettings\BuildVersion.asset", newVersion);
+					File.WriteAllText(@"Assets\Resources\BuildVersion.txt", newVersion);
 
 					StartBuild();
 				}
@@ -206,24 +206,38 @@ public class BuildSettingsWindow : EditorWindow
 			}
 		}
 
+		EditorGUILayout.BeginHorizontal();
 		if (existingTags.Contains(newVersion) && official)
 		{
-			EditorGUILayout.LabelField("Please choose a new version.");
+			EditorGUILayout.LabelField("This version already exists.");
 		}
 		else
 		{
 			EditorGUILayout.LabelField("");
 		}
+
+		if (official && newVersion.Length > 0)
+		{
+			string versionPreview = $"Tag preview: v{newVersion}";
+			if (beta)
+			{
+				versionPreview = versionPreview + "-beta";
+			}
+			EditorGUILayout.LabelField(versionPreview);
+		}
+		
+		EditorGUILayout.EndHorizontal();
+
 	}
 
 	private void StartBuild()
 	{
 		switch (operatingSystem)
 		{
-			case "Win64":
+			case OS.Win64:
 				AutomatedBuild.StartBuildWin64();
 				break;
-			case "OSX":
+			case OS.OSX:
 				AutomatedBuild.StartBuildOSX();
 				break;
 		}
@@ -312,4 +326,10 @@ public class BuildSettingsWindow : EditorWindow
 
 		return tags;
 	}
+}
+
+public enum OS
+{
+	Win64,
+	OSX
 }

@@ -40,7 +40,8 @@ public class AnimateProjector : MonoBehaviour
 		}
 
 		//NOTE(Jitse): Get the version number from a file and display it
-		versionNumber.text = File.ReadAllText(@"ProjectSettings\BuildVersion.asset");
+		TextAsset versionAsset = Resources.Load("BuildVersion") as TextAsset;
+		versionNumber.text = "Version: " + versionAsset.text;
 	}
 
 	public void MenuAnimation()

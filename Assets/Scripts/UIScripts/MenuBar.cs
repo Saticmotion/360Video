@@ -22,7 +22,8 @@ public class MenuBar : MonoBehaviour
 		}
 
 		//NOTE(Jitse): Get the version number from a file and display it
-		versionText.text = File.ReadAllText(@"ProjectSettings\BuildVersion.asset");
+		TextAsset versionAsset = Resources.Load("BuildVersion") as TextAsset;
+		versionText.text = "Version: " + versionAsset.text;
 	}
 
 	void OnMenuBarItemClick(int index)
